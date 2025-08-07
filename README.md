@@ -19,7 +19,7 @@
 
 ## Project Overview
 
-This repository implements a complete suite of reinforcement learning algorithms specifically designed for UAV autonomous navigation, obstacle avoidance, and target tracking in realistic 3D environments. From classic value-based methods to cutting-edge actor-critic algorithms, this collection provides researchers and developers with battle-tested implementations ready for real-world drone applications.
+This repository implements a complete suite of reinforcement learning algorithms specifically designed for UAV autonomous navigation, obstacle avoidance in realistic 3D environments. From classic value-based methods to cutting-edge actor-critic algorithms, this collection provides researchers and developers with battle-tested implementations ready for real-world drone applications.
 
 ## Algorithm Arsenal
 
