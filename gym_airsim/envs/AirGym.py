@@ -2,10 +2,10 @@ from settings_folder import settings
 import msgs
 # from gym.envs.classic_control import rendering  # Commented out for gym compatibility
 from environment_randomization.game_config_handler_class import *
-import gym
+import gymnasium as gym
 import collections
-from gym import spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 from gym_airsim.envs.airlearningclient import *
 from common.utils import *
 
