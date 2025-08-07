@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 *Powered by Ubuntu 20.04 • Unreal Engine 4.27 • AirSim 1.8.1*
-
+*Email:guowei_ni@bit.edu.cn*
 </div>
 
 ---
