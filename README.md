@@ -1,4 +1,4 @@
-# UAV强化学习算法集合
+# UAV-AirSim-RL-platform
 
 UAV_RL（Ubuntu20.04-UE4.27-AirSim1.8.1）的最小实现，包含经典主流RL训练无人机导航的核心功能。。
 
