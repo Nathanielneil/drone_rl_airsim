@@ -1,0 +1,137 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+.env
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Large binary files and models
+*.pth
+*.pkl
+*.h5
+*.onnx
+*.pb
+checkpoints/
+saved_models/
+models/
+*.model
+*.weights
+
+# Log files and results
+*.log
+logs/
+results/
+runs/
+tensorboard_logs/
+wandb/
+
+# AirSim large files
+AirSim_Precompiled/*.zip
+AirSim_Precompiled/*/Binaries/Linux/
+AirSim_Precompiled/*/Content/Paks/*.pak
+**/Saved/Logs/
+**/Saved/Crashes/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Documentation build
+docs/_build/
+docs/build/
+site/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Trash-*
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Docker files (avoid recursive Docker builds)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration files with sensitive data
+*.env
+.env.*
+secrets.yml
+config/local.yml
+
+# Large dataset files
+data/
+datasets/
+*.csv
+*.json
+*.xml
+*.h5
+*.hdf5

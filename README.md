@@ -7,6 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.7+-red.svg)](https://pytorch.org/)
 [![AirSim](https://img.shields.io/badge/AirSim-1.8.1-green.svg)](https://microsoft.github.io/AirSim/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg)](https://www.docker.com/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04-orange.svg)](https://ubuntu.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -89,20 +90,56 @@ drone_rl/
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Docker (Recommended)
+
+#### Prerequisites
+- Docker Engine 20.10+
+- NVIDIA Docker runtime (for GPU support)
+- Docker Compose 1.28+
+
+#### Quick Start with Docker
+```bash
+git clone https://github.com/Nathanielneil/drone_rl_airsim.git
+cd drone_rl_airsim
+
+# Simple training with GPU
+docker-compose up drone-rl-gpu
+
+# Development environment
+docker-compose up dev
+
+# Jupyter Lab for experimentation
+docker-compose up jupyter
+```
+
+#### Custom Docker Commands
+```bash
+# Build image
+./docker/build.sh
+
+# Run interactive development
+./docker/run.sh --dev
+
+# Start specific training
+./docker/run.sh --training ppo
+```
+
+### Option 2: Local Installation
+
+#### Prerequisites
 ```bash
 # Ensure AirSim environment is running
 # Ubuntu 20.04 + Unreal Engine 4.27 + AirSim 1.8.1
 ```
 
-### Installation
+#### Installation
 ```bash
 git clone https://github.com/Nathanielneil/drone_rl_airsim.git
 cd drone_rl_airsim
 pip install -r requirements.txt
 ```
 
-### Configuration
+#### Configuration
 ```bash
 # Edit machine-specific paths
 nano settings_folder/machine_dependent_settings.py

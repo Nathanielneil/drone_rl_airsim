@@ -1,0 +1,175 @@
+version: '3.8'
+
+services:
+  # Main training service (GPU)
+  drone-rl-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_TARGET: production
+        CUDA_VERSION: "11.1"
+        PYTHON_VERSION: "3.8"
+        UBUNTU_VERSION: "20.04"
+    image: drone-rl:gpu-latest
+    container_name: drone-rl-gpu
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - ./runs:/app/runs
+      - ./logs:/app/logs
+      - ./models:/app/models
+      - ./results:/app/results
+      - ./data:/app/data
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/Documents/AirSim:/home/drone/Documents/AirSim
+    ports:
+      - "6006:6006"  # TensorBoard
+      - "8050:8050"  # Dash/Plotly
+    networks:
+      - drone-rl-network
+    command: ["python", "train_ppo.py"]
+    restart: unless-stopped
+
+  # CPU-only training service
+  drone-rl-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        BUILD_TARGET: production
+        PYTHON_VERSION: "3.8"
+        UBUNTU_VERSION: "20.04"
+    image: drone-rl:cpu-latest
+    container_name: drone-rl-cpu
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - ./runs:/app/runs
+      - ./logs:/app/logs
+      - ./models:/app/models
+      - ./results:/app/results
+      - ./data:/app/data
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/Documents/AirSim:/home/drone/Documents/AirSim
+    ports:
+      - "6007:6006"  # TensorBoard (different port to avoid conflict)
+      - "8051:8050"  # Dash/Plotly
+    networks:
+      - drone-rl-network
+    command: ["python", "train_ppo.py"]
+    restart: unless-stopped
+
+  # Jupyter Lab service
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: jupyter
+      args:
+        BUILD_TARGET: jupyter
+        CUDA_VERSION: "11.1"
+        PYTHON_VERSION: "3.8"
+        UBUNTU_VERSION: "20.04"
+    image: drone-rl:jupyter-latest
+    container_name: drone-rl-jupyter
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - JUPYTER_ENABLE_LAB=yes
+    volumes:
+      - .:/app
+      - ./notebooks:/home/drone/notebooks
+      - ./data:/home/drone/data
+      - ${HOME}/Documents/AirSim:/home/drone/Documents/AirSim
+    ports:
+      - "8888:8888"  # Jupyter Lab
+    networks:
+      - drone-rl-network
+    restart: unless-stopped
+
+  # Development environment
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        BUILD_TARGET: development
+        CUDA_VERSION: "11.1"
+        PYTHON_VERSION: "3.8"
+        UBUNTU_VERSION: "20.04"
+    image: drone-rl:dev-latest
+    container_name: drone-rl-dev
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - .:/app
+      - ./runs:/app/runs
+      - ./logs:/app/logs
+      - ./models:/app/models
+      - ./results:/app/results
+      - ./data:/app/data
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/Documents/AirSim:/home/drone/Documents/AirSim
+    ports:
+      - "6008:6006"  # TensorBoard
+      - "8888:8888"  # Jupyter
+      - "8052:8050"  # Dash/Plotly
+    networks:
+      - drone-rl-network
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
+
+  # TensorBoard service
+  tensorboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: drone-rl:latest
+    container_name: drone-rl-tensorboard
+    volumes:
+      - ./runs:/app/runs:ro
+      - ./logs:/app/logs:ro
+    ports:
+      - "6006:6006"
+    networks:
+      - drone-rl-network
+    command: ["tensorboard", "--logdir=/app/runs", "--host=0.0.0.0", "--port=6006"]
+    restart: unless-stopped
+
+  # AirSim simulation service (if running AirSim in Docker)
+  airsim:
+    image: airsim/airsim-linux:latest
+    container_name: airsim-simulation
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/Documents/AirSim:/home/airsim/Documents/AirSim
+    ports:
+      - "41451:41451"  # AirSim API port
+    networks:
+      - drone-rl-network
+    restart: unless-stopped
+    profiles:
+      - simulation  # Optional service, enable with --profile simulation
+
+networks:
+  drone-rl-network:
+    driver: bridge
+
+volumes:
+  airsim-data:
+    driver: local
