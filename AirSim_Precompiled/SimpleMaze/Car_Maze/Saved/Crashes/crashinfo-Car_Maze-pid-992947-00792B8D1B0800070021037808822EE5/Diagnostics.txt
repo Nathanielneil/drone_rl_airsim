@@ -1,0 +1,56 @@
+Generating report for minidump
+
+Application version 4.18.3.0
+ ... built from changelist 0
+
+OS version Linux 5.15.0-140-generic (network name: ubuntu-Lenovo-Legion-R9000K2021H)
+Running 8 x86_64 processors (16 logical cores)
+Exception was "SIGSEGV: invalid attempt to read memory at address 0x0000000000000090"
+
+<SOURCE START>
+<SOURCE END>
+
+<CALLSTACK START>
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FLinuxPlatformStackWalk::CaptureStackBackTrace(unsigned long long*, unsigned int, void*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Core/Private/Linux/LinuxPlatformStackWalk.cpp:1040]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FGenericPlatformStackWalk::StackWalkAndDump(char*, unsigned long, int, void*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Core/Private/GenericPlatform/GenericPlatformStackWalk.cpp:173]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FLinuxCrashContext::CaptureStackTrace() + some bytes [Runtime/Core/Public/Containers/ContainerAllocationPolicies.h:332]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!CommonLinuxCrashHandler(FGenericCrashContext const&) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Linux/LinuxCommonStartup/Private/LinuxCommonStartup.cpp:37]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!PlatformCrashHandler(int, siginfo_t*, void*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Core/Private/Linux/LinuxPlatformCrashContext.cpp:597]
+Unknown!/lib/x86_64-linux-gnu/libpthread.so.0(+0x14420) [0x7f2c3bdb1420] + some bytes
+Unknown!clmdep_asio::detail::epoll_reactor::deregister_descriptor(int, clmdep_asio::detail::epoll_reactor::descriptor_state*&, bool) + some bytes
+Unknown!clmdep_asio::detail::reactive_socket_service_base::destroy(clmdep_asio::detail::reactive_socket_service_base::base_implementation_type&) + some bytes
+Unknown!clmdep_asio::stream_socket_service<clmdep_asio::ip::tcp>::destroy(clmdep_asio::detail::reactive_socket_service<clmdep_asio::ip::tcp>::implementation_type&) + some bytes
+Unknown!clmdep_asio::basic_io_object<clmdep_asio::stream_socket_service<clmdep_asio::ip::tcp>, true>::~basic_io_object() + some bytes
+Unknown!clmdep_asio::basic_socket<clmdep_asio::ip::tcp, clmdep_asio::stream_socket_service<clmdep_asio::ip::tcp> >::~basic_socket() + some bytes
+Unknown!clmdep_asio::basic_stream_socket<clmdep_asio::ip::tcp, clmdep_asio::stream_socket_service<clmdep_asio::ip::tcp> >::~basic_stream_socket() + some bytes
+Unknown!rpc::detail::async_writer::~async_writer() + some bytes
+Unknown!rpc::detail::server_session::~server_session() + some bytes
+Unknown!std::__1::__shared_ptr_emplace<rpc::detail::server_session, std::__1::allocator<rpc::detail::server_session> >::__on_zero_shared() + some bytes
+Unknown!std::__1::shared_ptr<rpc::detail::server_session>::~shared_ptr() + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d04d9] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d14bc] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d1a71] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d1700] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d13d3] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d1333] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d11b5] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x62d1020] + some bytes
+Unknown!clmdep_asio::detail::task_io_service_operation::complete(clmdep_asio::detail::task_io_service&, std::__1::error_code const&, unsigned long) + some bytes
+Unknown!clmdep_asio::detail::epoll_reactor::descriptor_state::do_complete(clmdep_asio::detail::task_io_service*, clmdep_asio::detail::task_io_service_operation*, std::__1::error_code const&, unsigned long) + some bytes
+Unknown!clmdep_asio::detail::task_io_service_operation::complete(clmdep_asio::detail::task_io_service&, std::__1::error_code const&, unsigned long) + some bytes
+Unknown!clmdep_asio::detail::task_io_service::do_run_one(clmdep_asio::detail::scoped_lock<clmdep_asio::detail::posix_mutex>&, clmdep_asio::detail::task_io_service_thread_info&, std::__1::error_code const&) + some bytes
+Unknown!clmdep_asio::detail::task_io_service::run(std::__1::error_code&) + some bytes
+Unknown!clmdep_asio::io_service::run() + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x6296508] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x629643d] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x6296289] + some bytes
+Unknown!std::__1::function<void ()>::operator()() const + some bytes
+Unknown!void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, std::__1::function<void ()> > >(void*) + some bytes
+Unknown!/lib/x86_64-linux-gnu/libpthread.so.0(+0x8609) [0x7f2c3bda5609] + some bytes
+Unknown!/lib/x86_64-linux-gnu/libc.so.6(clone+0x43) [0x7f2c3b4f6353] + some bytes
+
+<CALLSTACK END>
+
+0 loaded modules
+
+Report end!

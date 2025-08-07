@@ -1,0 +1,50 @@
+Generating report for minidump
+
+Application version 4.18.3.0
+ ... built from changelist 0
+
+OS version Linux 5.15.0-140-generic (network name: ubuntu-Lenovo-Legion-R9000K2021H)
+Running 8 x86_64 processors (16 logical cores)
+Exception was "SIGABRT: abort() called"
+
+<SOURCE START>
+<SOURCE END>
+
+<CALLSTACK START>
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FLinuxPlatformStackWalk::CaptureStackBackTrace(unsigned long long*, unsigned int, void*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Core/Private/Linux/LinuxPlatformStackWalk.cpp:1040]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FGenericPlatformStackWalk::StackWalkAndDump(char*, unsigned long, int, void*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Core/Private/GenericPlatform/GenericPlatformStackWalk.cpp:173]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FLinuxCrashContext::CaptureStackTrace() + some bytes [Runtime/Core/Public/Containers/ContainerAllocationPolicies.h:332]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!CommonLinuxCrashHandler(FGenericCrashContext const&) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Linux/LinuxCommonStartup/Private/LinuxCommonStartup.cpp:37]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!PlatformCrashHandler(int, siginfo_t*, void*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Core/Private/Linux/LinuxPlatformCrashContext.cpp:597]
+Unknown!/lib/x86_64-linux-gnu/libpthread.so.0(+0x14420) [0x7f30ca650420] + some bytes
+Unknown!/lib/x86_64-linux-gnu/libc.so.6(gsignal+0xcb) [0x7f30c9cb900b] + some bytes
+Unknown!/lib/x86_64-linux-gnu/libc.so.6(abort+0x12b) [0x7f30c9c98859] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x686145d] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x6861569] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x6861303] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze() [0x6860d86] + some bytes
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!nlohmann::basic_json<std::__1::map, std::__1::vector, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, bool, long, unsigned long, double, std::__1::allocator, nlohmann::adl_serializer>::parser::expect(nlohmann::basic_json<std::__1::map, std::__1::vector, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, bool, long, unsigned long, double, std::__1::allocator, nlohmann::adl_serializer>::lexer::token_type) const + some bytes [/home/airsim/repos/unreal-envs/SimpleMaze/Plugins/AirSim/Source/AirLib/include/common/common_utils/json.hpp:11607]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!nlohmann::basic_json<std::__1::map, std::__1::vector, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, bool, long, unsigned long, double, std::__1::allocator, nlohmann::adl_serializer>::parser::parse() + some bytes [/home/airsim/repos/unreal-envs/SimpleMaze/Plugins/AirSim/Source/AirLib/include/common/common_utils/json.hpp:11391]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!Unknown + some bytes [ThirdParty/Linux/LibCxx/include/c++/v1/type_traits:4421]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!msr::airlib::Settings::loadJSonString(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) + some bytes [/home/airsim/repos/unreal-envs/SimpleMaze/Plugins/AirSim/Source/AirLib/include/common/Settings.hpp:38]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!ASimHUD::initializeSettings() + some bytes [/home/airsim/repos/unreal-envs/SimpleMaze/Plugins/AirSim/Source/AirLib/include/common/AirSimSettings.hpp:392]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!ASimHUD::BeginPlay() + some bytes [/home/airsim/repos/unreal-envs/SimpleMaze/Plugins/AirSim/Source/SimHUD/SimHUD.cpp:27]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!AActor::DispatchBeginPlay() + some bytes [Runtime/Core/Public/Containers/UnrealString.h:56]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!AWorldSettings::NotifyBeginPlay() + some bytes [Runtime/Core/Public/UObject/NameTypes.h:1123]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!AGameStateBase::HandleBeginPlay() + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Engine/Private/GameStateBase.cpp:177]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!Unknown + some bytes [Runtime/Engine/Classes/Engine/World.h:1880]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!UEngine::LoadMap(FWorldContext&, FURL, UPendingNetGame*, FString&) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Engine/Private/UnrealEngine.cpp:10681]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!UEngine::Browse(FWorldContext&, FURL, FString&) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Engine/Private/UnrealEngine.cpp:9948]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!UGameInstance::StartGameInstance() + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Engine/Private/GameInstance.cpp:434]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!UGameEngine::Start() + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Engine/Private/GameEngine.cpp:713]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!FEngineLoop::Init() + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Launch/Private/LaunchEngineLoop.cpp:2726]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!GuardedMain(wchar_t const*) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Launch/Private/Launch.cpp:52]
+/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze!CommonLinuxMain(int, char**, int (*)(wchar_t const*)) + some bytes [/home/airsim/repos/UnrealEngine/Engine/Source/Runtime/Linux/LinuxCommonStartup/Private/LinuxCommonStartup.cpp:236]
+Unknown!/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf3) [0x7f30c9c9a083] + some bytes
+Unknown!/home/ubuntu/NGW/docs/AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze(_start+0x29) [0x232d7c9] + some bytes
+
+<CALLSTACK END>
+
+0 loaded modules
+
+Report end!

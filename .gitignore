@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs
+*.log
+logs/
+results/
+runs/
+tensorboard_logs/
+
+# Models and checkpoints
+*.pth
+*.pkl
+*.h5
+checkpoints/
+saved_models/
+
+# AirSim specific - Large binary files (>100MB)
+*.zip
+AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze
+AirSim_Precompiled/SimpleMaze/Car_Maze/Content/Paks/Car_Maze-LinuxNoEditor.pak
+AirSim_Precompiled/LinuxBlocks1.8.1/LinuxNoEditor/Blocks/Binaries/Linux/Blocks
+AirSim_Precompiled/*/Saved/Logs/
+AirSim_Precompiled/*/Saved/Crashes/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

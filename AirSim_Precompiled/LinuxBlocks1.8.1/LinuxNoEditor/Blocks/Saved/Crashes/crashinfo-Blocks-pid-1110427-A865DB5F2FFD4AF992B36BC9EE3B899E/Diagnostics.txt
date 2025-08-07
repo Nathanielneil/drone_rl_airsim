@@ -1,0 +1,30 @@
+Generating report for minidump
+
+Application version 4.27.2.0
+ ... built from changelist 18319896
+
+OS version Linux 5.15.0-140-generic (network name: ubuntu-Lenovo-Legion-R9000K2021H)
+Running 8 x86_64 processors (16 logical cores)
+Exception was "SIGSEGV: invalid attempt to read memory at address 0x0000000000000000"
+
+<SOURCE START>
+<SOURCE END>
+
+<CALLSTACK START>
+Blocks!UnknownFunction(0x319200f)
+Blocks!UnknownFunction(0x8b3b32b)
+Blocks!_ZN3rpc6detail10dispatcher13dispatch_callERKN14clmdep_msgpack2v26objectEb(+0x8b)
+Blocks!_ZN3rpc6detail10dispatcher8dispatchERKN14clmdep_msgpack2v26objectEb(+0x2b)
+Blocks!UnknownFunction(0x8b883d0)
+Blocks!_ZN11clmdep_asio6detail15task_io_service10do_run_oneERNS0_11scoped_lockINS0_11posix_mutexEEERNS0_27task_io_service_thread_infoERKNSt3__110error_codeE(+0x2b1)
+Blocks!_ZN11clmdep_asio6detail15task_io_service3runERNSt3__110error_codeE(+0xb0)
+Blocks!UnknownFunction(0x8b7e47d)
+Blocks!_ZNSt3__114__thread_proxyINS_5tupleIJNS_10unique_ptrINS_15__thread_structENS_14default_deleteIS3_EEEENS_8functionIFvvEEEEEEEEPvSB_(+0x2c)
+libpthread.so.0!UnknownFunction(0x8608)
+libc.so.6!clone(+0x42)
+
+<CALLSTACK END>
+
+0 loaded modules
+
+Report end!

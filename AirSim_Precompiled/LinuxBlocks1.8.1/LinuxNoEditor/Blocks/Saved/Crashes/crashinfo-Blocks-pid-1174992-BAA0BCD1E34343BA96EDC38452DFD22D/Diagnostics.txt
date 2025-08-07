@@ -1,0 +1,35 @@
+Generating report for minidump
+
+Application version 4.27.2.0
+ ... built from changelist 18319896
+
+OS version Linux 5.15.0-140-generic (network name: ubuntu-Lenovo-Legion-R9000K2021H)
+Running 8 x86_64 processors (16 logical cores)
+Exception was "SIGSEGV: invalid attempt to write memory at address 0x0000000000000003"
+
+<SOURCE START>
+<SOURCE END>
+
+<CALLSTACK START>
+Blocks!UnknownFunction(0x3fbf18d)
+Blocks!UnknownFunction(0x418bc2a)
+Blocks!UnknownFunction(0x669708a)
+Blocks!UnknownFunction(0x669c106)
+Blocks!UnknownFunction(0x66b308b)
+Blocks!UnknownFunction(0x665e29a)
+Blocks!UnknownFunction(0x67de5af)
+Blocks!UnknownFunction(0x68261b8)
+Blocks!UnknownFunction(0x6825ab6)
+Blocks!UnknownFunction(0x3f826fa)
+Blocks!UnknownFunction(0x3f8124d)
+Blocks!UnknownFunction(0x687d7c7)
+Blocks!UnknownFunction(0x4047886)
+Blocks!UnknownFunction(0x3fdce9b)
+libpthread.so.0!UnknownFunction(0x8608)
+libc.so.6!clone(+0x42)
+
+<CALLSTACK END>
+
+0 loaded modules
+
+Report end!
