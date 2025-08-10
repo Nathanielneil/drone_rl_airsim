@@ -31,7 +31,11 @@ class FluorescentTrail:
             "toxic_green": self._toxic_green_trail,
             "hot_pink": self._hot_pink_trail,
             "cyber_purple": self._cyber_purple_trail,
-            "plasma": self._plasma_trail
+            "plasma": self._plasma_trail,
+            "laser_red": self._laser_red_trail,
+            "ghost_white": self._ghost_white_trail,
+            "neon_orange": self._neon_orange_trail,
+            "ultra_thin": self._ultra_thin_trail
         }
         
         if color_type in effects:
@@ -43,60 +47,84 @@ class FluorescentTrail:
         """彩虹荧光轨迹"""
         print("设置彩虹荧光轨迹...")
         colors = [
-            [1.0, 0.0, 0.5, 1.0],  # 荧光红
-            [1.0, 0.5, 0.0, 1.0],  # 荧光橙
-            [1.0, 1.0, 0.0, 1.0],  # 荧光黄
-            [0.0, 1.0, 0.0, 1.0],  # 荧光绿
-            [0.0, 1.0, 1.0, 1.0],  # 荧光青
-            [0.0, 0.0, 1.0, 1.0],  # 荧光蓝
-            [1.0, 0.0, 1.0, 1.0],  # 荧光紫
+            [1.0, 0.2, 0.3, 0.9],  # 鲜红
+            [1.0, 0.6, 0.0, 0.9],  # 橙色
+            [1.0, 1.0, 0.3, 0.9],  # 亮黄
+            [0.3, 1.0, 0.3, 0.9],  # 鲜绿
+            [0.0, 0.8, 1.0, 0.9],  # 青蓝
+            [0.3, 0.3, 1.0, 0.9],  # 蓝色
+            [0.8, 0.3, 1.0, 0.9],  # 紫色
         ]
         
         for i, color in enumerate(colors):
-            self.client.simSetTraceLine(color, 15 + i * 5)
-            time.sleep(0.5)
+            self.client.simSetTraceLine(color, 3 + i * 0.5)
+            time.sleep(0.3)
     
     def _electric_blue_trail(self):
         """电子蓝荧光轨迹"""
         print("设置电子蓝荧光轨迹...")
         # 电子蓝：强烈的蓝色带白色光晕
-        self.client.simSetTraceLine([0.0, 0.8, 1.0, 1.0], 25)
-        time.sleep(0.2)
-        self.client.simSetTraceLine([0.3, 0.9, 1.0, 0.8], 30)
+        self.client.simSetTraceLine([0.1, 0.7, 1.0, 0.95], 4)
+        time.sleep(0.1)
+        self.client.simSetTraceLine([0.2, 0.85, 1.0, 0.8], 5)
     
     def _toxic_green_trail(self):
         """毒液绿荧光轨迹"""
         print("设置毒液绿荧光轨迹...")
         # 毒绿色：明亮的绿色
-        self.client.simSetTraceLine([0.0, 1.0, 0.2, 1.0], 20)
-        time.sleep(0.2)
-        self.client.simSetTraceLine([0.2, 1.0, 0.0, 0.9], 25)
+        self.client.simSetTraceLine([0.2, 1.0, 0.3, 0.95], 4)
+        time.sleep(0.1)
+        self.client.simSetTraceLine([0.4, 1.0, 0.2, 0.85], 5)
     
     def _hot_pink_trail(self):
         """热粉荧光轨迹"""
         print("设置热粉荧光轨迹...")
         # 热粉色：明亮的粉红
-        self.client.simSetTraceLine([1.0, 0.0, 0.7, 1.0], 20)
-        time.sleep(0.2)
-        self.client.simSetTraceLine([1.0, 0.3, 0.8, 0.8], 25)
+        self.client.simSetTraceLine([1.0, 0.2, 0.6, 0.95], 4)
+        time.sleep(0.1)
+        self.client.simSetTraceLine([1.0, 0.4, 0.7, 0.85], 5)
     
     def _cyber_purple_trail(self):
         """赛博紫荧光轨迹"""
         print("设置赛博紫荧光轨迹...")
         # 赛博紫：深紫色带电子效果
-        self.client.simSetTraceLine([0.6, 0.0, 1.0, 1.0], 20)
-        time.sleep(0.2)
-        self.client.simSetTraceLine([0.8, 0.3, 1.0, 0.8], 25)
+        self.client.simSetTraceLine([0.7, 0.2, 1.0, 0.95], 4)
+        time.sleep(0.1)
+        self.client.simSetTraceLine([0.8, 0.4, 1.0, 0.85], 5)
     
     def _plasma_trail(self):
         """等离子体荧光轨迹"""
         print("设置等离子体荧光轨迹...")
         # 等离子体：白色到蓝色渐变
-        self.client.simSetTraceLine([1.0, 1.0, 1.0, 1.0], 15)
-        time.sleep(0.3)
-        self.client.simSetTraceLine([0.7, 0.9, 1.0, 0.9], 20)
-        time.sleep(0.3)
-        self.client.simSetTraceLine([0.3, 0.7, 1.0, 0.8], 25)
+        self.client.simSetTraceLine([0.9, 0.95, 1.0, 0.9], 3)
+        time.sleep(0.2)
+        self.client.simSetTraceLine([0.6, 0.85, 1.0, 0.85], 4)
+        time.sleep(0.2)
+        self.client.simSetTraceLine([0.3, 0.7, 1.0, 0.8], 5)
+    
+    def _laser_red_trail(self):
+        """激光红轨迹"""
+        print("设置激光红轨迹...")
+        # 激光红：纯红色，非常细的线条
+        self.client.simSetTraceLine([1.0, 0.0, 0.0, 1.0], 2)
+    
+    def _ghost_white_trail(self):
+        """幽灵白轨迹"""
+        print("设置幽灵白轨迹...")
+        # 幽灵白：半透明白色
+        self.client.simSetTraceLine([1.0, 1.0, 1.0, 0.7], 3)
+    
+    def _neon_orange_trail(self):
+        """霓虹橙轨迹"""
+        print("设置霓虹橙轨迹...")
+        # 霓虹橙：明亮的橙色
+        self.client.simSetTraceLine([1.0, 0.5, 0.0, 0.9], 4)
+    
+    def _ultra_thin_trail(self):
+        """超细轨迹"""
+        print("设置超细轨迹...")
+        # 超细线：几乎不可见的细线，青蓝色
+        self.client.simSetTraceLine([0.0, 1.0, 1.0, 0.8], 1)
     
     def dynamic_trail_effect(self, duration=10):
         """动态变化的荧光轨迹效果"""
@@ -110,7 +138,7 @@ class FluorescentTrail:
             self.set_neon_trail(effect)
             time.sleep(2)
     
-    def set_custom_fluorescent(self, r, g, b, thickness=20):
+    def set_custom_fluorescent(self, r, g, b, thickness=4):
         """设置自定义荧光颜色"""
         # 增强饱和度和亮度以获得荧光效果
         h, s, v = colorsys.rgb_to_hsv(r, g, b)

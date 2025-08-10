@@ -140,7 +140,8 @@ def main():
         
         # 每20个episode变换一次荧光轨迹颜色
         if trail_controller and episode % 20 == 0:
-            effects = ["electric_blue", "toxic_green", "hot_pink", "cyber_purple", "plasma"]
+            effects = ["ultra_thin", "laser_red", "ghost_white", "electric_blue", "toxic_green", 
+                      "hot_pink", "cyber_purple", "neon_orange", "plasma"]
             effect = effects[episode // 20 % len(effects)]
             trail_controller.set_neon_trail(effect)
             print(f"轨迹颜色变换为: {effect}")
