@@ -17,7 +17,7 @@ import numpy as np
 
 
 
-INCORPORATE = 7
+INCORPORATE = 9
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
 

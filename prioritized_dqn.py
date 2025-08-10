@@ -1,5 +1,5 @@
 import math, random
-import gym
+import gymnasium as gym
 import numpy as np
 from pathlib import Path
 import torch
@@ -8,10 +8,11 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 import gym_airsim
-from game_handling.game_handler_class import *
-from Rainbow.common.wrappers import make_atari, wrap_deepmind, wrap_pytorch
+# from game_handling.game_handler_class import *  # Not needed
+# from Rainbow.common.wrappers import make_atari, wrap_deepmind, wrap_pytorch  # Not needed
 from tqdm import trange
 import cv2
+import os
 
 
 def get_p_and_g_mean_norm(it):
@@ -121,7 +122,7 @@ class CnnDQN(nn.Module):
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(self.feature_size()+10, 512),
+            nn.Linear(self.feature_size()+9, 512),
             nn.ReLU(),
             nn.Linear(512, self.num_actions)
         )
@@ -339,8 +340,9 @@ class PER_DQN(object):
 
 
 def start_game():
-    game_handler = GameHandler()
-    game_handler.start_game_in_editor()
+    # game_handler = GameHandler()
+    # game_handler.start_game_in_editor()
+    pass  # Disabled for testing
 
 
 
@@ -358,18 +360,19 @@ if torch.cuda.is_available():
 else:
     torch.set_num_threads(8)
 
-env_id = "AirSimEnv-v42"#CartPole-v0 "AirSimEnv-v42" PongNoFrameskip-v4
+env_id = "AirSimEnv-v42"
 if env_id =="AirSimEnv-v42":
     start_game()
-    env = gym.make(env_id)
-    env.seed(seed)
+    # env = gym.make(env_id)  # Use direct import instead
+    from gym_airsim.envs.AirGym import AirSimEnv
+    env = AirSimEnv(need_render=False)
 elif env_id =="CartPole-v0":
     env = gym.make(env_id)
-    env.seed(seed)
 elif env_id=="PongNoFrameskip-v4":
-    env = make_atari(env_id)
-    env = wrap_deepmind(env)
-    env = wrap_pytorch(env)
+    # env = make_atari(env_id)
+    # env = wrap_deepmind(env)
+    # env = wrap_pytorch(env)
+    pass
 
 # path
 model_dir = Path('./results') / env_id / "per"
@@ -449,9 +452,9 @@ for frame_idx in trange(1, num_frames + 1):
 
     per_dqn.replay_buffer.push_airsim(state, action, reward, next_state, done)
 
-    img = np.array(state[0][0], dtype=np.uint8)
-    cv2.imshow("0", img)
-    cv2.waitKey(1)
+    # img = np.array(state[0][0], dtype=np.uint8)
+    # cv2.imshow("0", img)
+    # cv2.waitKey(1)
 
     state = next_state
     episode_reward += reward

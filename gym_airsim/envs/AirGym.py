@@ -8,6 +8,8 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 from gym_airsim.envs.airlearningclient import *
 from common.utils import *
+import time
+import airsim
 
 
 class AirSimEnv(gym.Env):
@@ -56,6 +58,15 @@ class AirSimEnv(gym.Env):
         self.success = False
         self.level=0
         self.success_deque = collections.deque(maxlen=100)
+        
+        # 智能碰撞恢复机制变量
+        self.collision_count = 0          # 连续碰撞计数
+        self.steps_since_collision = 0    # 距离上次碰撞的步数
+        self.collision_reset_threshold = 3  # 连续碰撞3次触发重置
+        self.collision_reset_interval = 5   # 5步后重置计数
+        self.safe_zone_radius = 3.0         # 安全区域搜索半径
+        self.start_position = None          # 起点位置，用于重置
+        
         self.seed()
 
         self.need_render=need_render
@@ -127,14 +138,19 @@ class AirSimEnv(gym.Env):
     def step(self, action):
 
         self.stepN += 1
-        action = action[0]
-
-        #self.airgym.client.simPause(False)
+        
+        # Handle action format based on control mode
         if (settings.control_mode == "moveByVelocity"):
-
+            # For continuous control, keep action as is (should be [delta_x, delta_y])
+            if hasattr(action, '__len__') and len(action) == 1 and hasattr(action[0], '__len__'):
+                # Handle case where action is wrapped: [[delta_x, delta_y]]
+                action = action[0]
+            # action should now be [delta_x, delta_y] for continuous control
             collided = self.airgym.take_continious_action(action)
-
         else:
+            # For discrete control, extract the action index
+            if hasattr(action, '__len__'):
+                action = action[0]
             collided = self.airgym.take_discrete_action(action)
 
         #self.airgym.client.simPause(True)
@@ -181,9 +197,32 @@ class AirSimEnv(gym.Env):
 
         elif collided == True:
             print("💥 COLLISION detected!")
-            # 降低碰撞惩罚，不立即终止episode
-            reward = -5.0  # 轻度惩罚而不是-20
-            done = False   # 继续训练而不是立即重置
+            
+            # 更新碰撞计数和步数统计
+            self.collision_count += 1
+            self.steps_since_collision = 0
+            
+            # 渐进惩罚机制
+            if self.collision_count == 1:
+                reward = -5.0
+                print(f"第1次碰撞，轻微惩罚: {reward}")
+                done = False
+                
+            elif self.collision_count == 2:
+                reward = -15.0
+                print(f"第2次碰撞，中度惩罚: {reward}，强制悬停2秒")
+                # 强制悬停2秒
+                self.airgym.client.hoverAsync().join()
+                time.sleep(2.0)
+                done = False
+                
+            elif self.collision_count >= 3:
+                reward = -30.0
+                print(f"第3次及以上碰撞，重度惩罚: {reward}，触发智能重置")
+                # 执行智能重置
+                self.execute_collision_recovery()
+                done = False  # 不终止episode，保留训练数据
+                
             self.success = False
 
         elif self.stepN >= settings.nb_max_episodes_steps:
@@ -198,6 +237,15 @@ class AirSimEnv(gym.Env):
             self.success = False
 
         else:
+            # 更新非碰撞步数计数
+            self.steps_since_collision += 1
+            
+            # 如果距离上次碰撞超过间隔步数，重置碰撞计数
+            if self.steps_since_collision >= self.collision_reset_interval:
+                if self.collision_count > 0:
+                    print(f"碰撞计数重置：{self.collision_count} -> 0 (间隔{self.steps_since_collision}步)")
+                    self.collision_count = 0
+            
             reward = self.computeReward(now)
             print(f"📊 CONTINUING - Computed reward: {reward:.3f}")
             done = False
@@ -220,7 +268,65 @@ class AirSimEnv(gym.Env):
 
 
     def on_episode_end(self):
-        pass
+        # 重置碰撞计数
+        self.collision_count = 0
+        self.steps_since_collision = 0
+        
+    def find_safe_position_near_start(self):
+        """在起点附近寻找安全区域"""
+        if self.start_position is None:
+            # 如果没有起点，使用当前位置
+            self.start_position = self.airgym.drone_pos()
+            
+        max_attempts = 10
+        for attempt in range(max_attempts):
+            # 在起点周围随机选择位置
+            angle = np.random.uniform(0, 2*np.pi)
+            distance = np.random.uniform(1.0, self.safe_zone_radius)
+            
+            safe_x = self.start_position[0] + distance * np.cos(angle)
+            safe_y = self.start_position[1] + distance * np.sin(angle)
+            safe_z = self.start_position[2]  # 保持相同高度
+            
+            safe_position = [safe_x, safe_y, safe_z]
+            
+            # 简单的安全检查：不要太接近边界
+            if (-50 < safe_x < 50 and -50 < safe_y < 50 and -10 < safe_z < 2):
+                return safe_position
+                
+        # 如果找不到安全位置，回到起点
+        return self.start_position
+        
+    def execute_collision_recovery(self):
+        """执行碰撞恢复：移动到安全区域"""
+        print(f"执行碰撞恢复：连续碰撞{self.collision_count}次")
+        
+        # 寻找安全位置
+        safe_position = self.find_safe_position_near_start()
+        
+        try:
+            # 移动到安全位置
+            self.airgym.client.simSetVehiclePose(
+                airsim.Pose(
+                    airsim.Vector3r(safe_position[0], safe_position[1], safe_position[2]),
+                    airsim.Quaternionr(0, 0, 0, 1)
+                ),
+                True  # ignore_collision
+            )
+            
+            # 重置碰撞状态
+            time.sleep(0.5)  # 给仿真器时间处理
+            
+            print(f"成功重置到安全位置: ({safe_position[0]:.2f}, {safe_position[1]:.2f}, {safe_position[2]:.2f})")
+            
+        except Exception as e:
+            print(f"碰撞恢复失败: {e}")
+            # 如果重置失败，至少重置计数
+            pass
+            
+        # 重置碰撞计数
+        self.collision_count = 0
+        self.steps_since_collision = 0
 
 
     def on_episode_start(self):
@@ -250,6 +356,11 @@ class AirSimEnv(gym.Env):
         self.airgym.client.takeoffAsync().join()
 
         now = self.airgym.drone_pos()
+        
+        # 记录起点位置用于碰撞恢复
+        if self.start_position is None:
+            self.start_position = now.copy()
+            print(f"记录起点位置: ({now[0]:.2f}, {now[1]:.2f}, {now[2]:.2f})")
 
         ##sometimes there may occur something you can't imagine! Just like your uav is dancing~
 

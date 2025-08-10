@@ -87,7 +87,7 @@ class CnnDQN(nn.Module):
         return x
 
 
-    def act(self, state, epsilon):
+    def act(self, state, epsilon, env):
         if random.random() > epsilon:
             state = [Variable(torch.as_tensor(np.float32(state[0]), dtype=torch.float32)).unsqueeze(0),
                      Variable(torch.as_tensor(np.float32(state[1]), dtype=torch.float32)).unsqueeze(0)]
@@ -221,7 +221,7 @@ save_freq=6000
 state = env.reset()
 for frame_idx in trange(1, num_frames + 1):
     epsilon = epsilon_by_frame(frame_idx)
-    action = current_model.act(state, epsilon)
+    action = current_model.act(state, epsilon, env)
 
     next_state, reward, done, _ = env.step([action])
     replay_buffer.push(state, action, reward, next_state, done)

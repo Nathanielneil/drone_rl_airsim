@@ -1,6 +1,6 @@
 """
-TD3 (Twin Delayed DDPG) Implementation for UAV Navigation
-An improved version of DDPG with clipped double Q-learning and delayed policy updates
+DDPG (Deep Deterministic Policy Gradient) Implementation for UAV Navigation
+PyTorch implementation adapted for AirSim environment
 """
 
 import torch
@@ -9,28 +9,18 @@ import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
 import os
-import sys
 import random
 from collections import deque
+from pathlib import Path
+from tensorboardX import SummaryWriter
+from tqdm import trange
 
 # Add path to import AirSim environment
 from gym_airsim.envs.AirGym import AirSimEnv
 
-# Simplified logger to avoid termcolor dependency
-class SimpleLogger:
-    def __init__(self, log_dir):
-        self.log_dir = log_dir
-        os.makedirs(log_dir, exist_ok=True)
-    
-    def log_scalar(self, tag, value, step):
-        # Simple console logging instead of tensorboard
-        print(f"[{step}] {tag}: {value:.4f}")
-
-Logger = SimpleLogger
-
 
 class ReplayBuffer:
-    """Experience Replay Buffer for TD3"""
+    """Experience Replay Buffer for DDPG"""
     
     def __init__(self, max_size=1e6):
         self.storage = []
@@ -63,7 +53,7 @@ class ReplayBuffer:
 
 
 class Actor(nn.Module):
-    """Actor Network for TD3"""
+    """Actor Network for DDPG"""
     
     def __init__(self, state_dim, action_dim, max_action, hidden_dim=400):
         super(Actor, self).__init__()
@@ -81,7 +71,7 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    """Twin Critic Network for TD3"""
+    """Twin Critic Network for DDPG (inspired by TD3)"""
     
     def __init__(self, state_dim, action_dim, hidden_dim=400):
         super(Critic, self).__init__()
@@ -119,8 +109,29 @@ class Critic(nn.Module):
         return q1
 
 
-class TD3:
-    """TD3 Agent"""
+class OUNoise:
+    """Ornstein-Uhlenbeck noise for exploration"""
+    
+    def __init__(self, action_dim, mu=0.0, theta=0.15, sigma=0.2):
+        self.action_dim = action_dim
+        self.mu = mu
+        self.theta = theta
+        self.sigma = sigma
+        self.state = np.ones(self.action_dim) * self.mu
+        self.reset()
+
+    def reset(self):
+        self.state = np.ones(self.action_dim) * self.mu
+
+    def noise(self):
+        x = self.state
+        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
+        self.state = x + dx
+        return self.state
+
+
+class DDPG:
+    """DDPG Agent"""
     
     def __init__(self, state_dim, action_dim, max_action, config):
         self.config = config
@@ -138,24 +149,21 @@ class TD3:
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=config.critic_lr)
         
         self.max_action = max_action
-        self.total_it = 0
+        self.noise = OUNoise(action_dim)
     
-    def select_action(self, state, noise=0.1):
+    def select_action(self, state, add_noise=True):
         """Select action using current policy"""
         state = torch.FloatTensor(state.reshape(1, -1)).to(self.device)
         action = self.actor(state).cpu().data.numpy().flatten()
         
-        if noise != 0:
-            action = (action + np.random.normal(0, noise, size=action.shape)).clip(
-                -self.max_action, self.max_action
-            )
+        if add_noise:
+            action = action + self.noise.noise()
+            action = np.clip(action, -self.max_action, self.max_action)
         
         return action
     
     def train(self, replay_buffer, batch_size=256):
-        """Train the TD3 agent"""
-        self.total_it += 1
-        
+        """Train the DDPG agent with Twin Critics"""
         # Sample replay buffer
         state, action, next_state, reward, done = replay_buffer.sample(batch_size)
         state = state.to(self.device)
@@ -164,25 +172,17 @@ class TD3:
         reward = reward.to(self.device)
         done = done.to(self.device)
         
+        # Compute the target Q value using twin critics
         with torch.no_grad():
-            # Select action according to policy and add clipped noise
-            noise = (torch.randn_like(action) * self.config.policy_noise).clamp(
-                -self.config.noise_clip, self.config.noise_clip
-            )
-            
-            next_action = (self.actor_target(next_state) + noise).clamp(
-                -self.max_action, self.max_action
-            )
-            
-            # Compute the target Q value
+            next_action = self.actor_target(next_state)
             target_Q1, target_Q2 = self.critic_target(next_state, next_action)
-            target_Q = torch.min(target_Q1, target_Q2)
+            target_Q = torch.min(target_Q1, target_Q2)  # Take minimum for conservative estimate
             target_Q = reward + (1 - done) * self.config.gamma * target_Q
         
-        # Get current Q estimates
+        # Get current Q estimates from both critics
         current_Q1, current_Q2 = self.critic(state, action)
         
-        # Compute critic loss
+        # Compute critic loss for both critics
         critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
         
         # Optimize the critic
@@ -190,27 +190,22 @@ class TD3:
         critic_loss.backward()
         self.critic_optimizer.step()
         
-        # Delayed policy updates
-        if self.total_it % self.config.policy_freq == 0:
-            
-            # Compute actor loss
-            actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
-            
-            # Optimize the actor
-            self.actor_optimizer.zero_grad()
-            actor_loss.backward()
-            self.actor_optimizer.step()
-            
-            # Update the frozen target models
-            for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
-                target_param.data.copy_(self.config.tau * param.data + (1 - self.config.tau) * target_param.data)
-            
-            for param, target_param in zip(self.actor.parameters(), self.actor_target.parameters()):
-                target_param.data.copy_(self.config.tau * param.data + (1 - self.config.tau) * target_param.data)
-            
-            return actor_loss.item(), critic_loss.item()
+        # Compute actor loss using Q1 only (like TD3)
+        actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
         
-        return None, critic_loss.item()
+        # Optimize the actor
+        self.actor_optimizer.zero_grad()
+        actor_loss.backward()
+        self.actor_optimizer.step()
+        
+        # Update the target networks
+        for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
+            target_param.data.copy_(self.config.tau * param.data + (1 - self.config.tau) * target_param.data)
+        
+        for param, target_param in zip(self.actor.parameters(), self.actor_target.parameters()):
+            target_param.data.copy_(self.config.tau * param.data + (1 - self.config.tau) * target_param.data)
+        
+        return actor_loss.item(), critic_loss.item()
     
     def save(self, filename):
         """Save model parameters"""
@@ -234,40 +229,33 @@ class TD3:
         self.critic_optimizer.load_state_dict(checkpoint['critic_optimizer'])
 
 
-class TD3Config:
-    """Configuration for TD3"""
+class DDPGConfig:
+    """Configuration for DDPG"""
     def __init__(self):
         # Network parameters
-        self.actor_lr = 3e-4
-        self.critic_lr = 3e-4
+        self.actor_lr = 1e-4
+        self.critic_lr = 1e-3
         self.gamma = 0.99
         self.tau = 0.005
         
-        # TD3 specific parameters
-        self.policy_noise = 0.2
-        self.noise_clip = 0.5
-        self.policy_freq = 2
-        
         # Training parameters
-        self.batch_size = 256
-        self.start_timesteps = 25000
-        self.max_timesteps = 1000000
-        self.exploration_noise = 0.1
+        self.batch_size = 64
+        self.start_timesteps = 10000
+        self.max_timesteps = 100000
         
         # Environment
         self.env_name = 'AirGym'
         
         # Logging and saving
-        self.eval_freq = 5000
         self.save_freq = 10000
         self.log_freq = 1000
-        self.model_save_path = 'models/td3/'
-        self.log_dir = 'logs/td3/'
+        self.model_save_path = 'models/ddpg/'
+        self.log_dir = 'logs/ddpg/'
 
 
-def train_td3():
-    """Main TD3 training function"""
-    config = TD3Config()
+def train_ddpg():
+    """Main DDPG training function"""
+    config = DDPGConfig()
     
     # Create directories
     os.makedirs(config.model_save_path, exist_ok=True)
@@ -275,35 +263,39 @@ def train_td3():
     
     # Environment
     env = AirSimEnv(need_render=False)
-    # AirSimEnv returns [image, inform_vector], we use inform_vector for TD3
+    # AirSimEnv returns [image, inform_vector], we use inform_vector for DDPG
     state_dim = 9  # inform_vector dimension: relative_position(2) + velocity(3) + pry(3) + r_yaw(1)
     action_dim = env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
     
+    print(f"State dim: {state_dim}, Action dim: {action_dim}, Max action: {max_action}")
+    
     # Agent
-    agent = TD3(state_dim, action_dim, max_action, config)
+    agent = DDPG(state_dim, action_dim, max_action, config)
     
     # Replay buffer
     replay_buffer = ReplayBuffer()
     
     # Logger
-    logger = Logger(config.log_dir)
+    logger = SummaryWriter(config.log_dir)
     
     # Training loop
     obs = env.reset()
-    state = obs[1]  # Use only inform_vector for TD3
+    state = obs[1]  # Use only inform_vector for DDPG
     episode_reward = 0
     episode_timesteps = 0
     episode_num = 0
     
-    for t in range(config.max_timesteps):
+    print(f"Starting DDPG training on {agent.device}")
+    
+    for t in trange(config.max_timesteps):
         episode_timesteps += 1
         
         # Select action randomly or according to policy
         if t < config.start_timesteps:
             action = env.action_space.sample()
         else:
-            action = agent.select_action(np.array(state), config.exploration_noise)
+            action = agent.select_action(np.array(state))
         
         # Ensure action is properly formatted
         action = np.array(action, dtype=np.float32)
@@ -311,44 +303,41 @@ def train_td3():
         # Perform action
         next_obs, reward, done, _ = env.step(action)
         next_state = next_obs[1]  # Use only inform_vector
-        # Use settings max episode steps instead of env._max_episode_steps
-        from settings_folder import settings
-        done_bool = float(done) if episode_timesteps < settings.nb_max_episodes_steps else 0
         
         # Store data in replay buffer
-        replay_buffer.add(state, action, next_state, reward, done_bool)
+        replay_buffer.add(state, action, next_state, reward, float(done))
         
         state = next_state
         episode_reward += reward
         
         # Train agent after collecting sufficient data
-        if t >= config.start_timesteps:
+        if t >= config.start_timesteps and replay_buffer.size() >= config.batch_size:
             actor_loss, critic_loss = agent.train(replay_buffer, config.batch_size)
             
             if t % config.log_freq == 0:
-                logger.log_scalar('loss/critic', critic_loss, t)
-                if actor_loss is not None:
-                    logger.log_scalar('loss/actor', actor_loss, t)
+                logger.add_scalar('loss/actor', actor_loss, t)
+                logger.add_scalar('loss/critic', critic_loss, t)
         
         if done:
             print(f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f}")
-            logger.log_scalar('episode/reward', episode_reward, episode_num)
+            logger.add_scalar('episode/reward', episode_reward, episode_num)
             
-            # Reset environment
+            # Reset environment and noise
             obs = env.reset()
             state = obs[1]  # Use only inform_vector
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
+            agent.noise.reset()
         
         # Save model
         if (t + 1) % config.save_freq == 0:
-            agent.save(os.path.join(config.model_save_path, f'td3_{t+1}.pth'))
+            agent.save(os.path.join(config.model_save_path, f'ddpg_{t+1}.pth'))
     
     # Save final model
-    agent.save(os.path.join(config.model_save_path, 'td3_final.pth'))
-    print('TD3 training completed!')
+    agent.save(os.path.join(config.model_save_path, 'ddpg_final.pth'))
+    print('DDPG training completed!')
 
 
 if __name__ == '__main__':
-    train_td3()
+    train_ddpg()

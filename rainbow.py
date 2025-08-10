@@ -1,6 +1,7 @@
-import gym
+import gymnasium as gym
 import numpy as np
 import random,math
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,7 +9,7 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 from Rainbow.common.layers import NoisyLinear
 import gym_airsim
-from game_handling.game_handler_class import *
+# from game_handling.game_handler_class import *  # Not needed
 from tqdm import trange
 from pathlib import Path
 from tensorboardX import SummaryWriter
@@ -290,9 +291,11 @@ else:
     torch.set_num_threads(8)
 
 #start_game()
-#env_id = "AirSimEnv-v42"
-env_id = "CartPole-v0"
-env = gym.make(env_id)
+env_id = "AirSimEnv-v42"
+#env_id = "CartPole-v0"
+# env = gym.make(env_id)  # Use direct import instead
+from gym_airsim.envs.AirGym import AirSimEnv
+env = AirSimEnv(need_render=False)
 
 # path
 model_dir = Path('./results') / env_id / "rainbow"
@@ -340,8 +343,10 @@ episode_reward = 0
 USE_CUDA = torch.cuda.is_available()
 Variable = lambda *args, **kwargs: autograd.Variable(*args, **kwargs).cuda() if USE_CUDA else autograd.Variable(*args, **kwargs)
 
-use_popart=True
-rainbow= Rainbow(lr,env.observation_space.shape[0], env.action_space.n, num_atoms, Vmin, Vmax,capacity,use_popart)
+use_popart=False  # Disable PopArt to avoid missing dependency
+# AirSimEnv returns [image, inform_vector], we use inform_vector for Rainbow
+state_dim = 9  # inform_vector dimension: relative_position(2) + velocity(3) + pry(3) + r_yaw(1)
+rainbow= Rainbow(lr, state_dim, env.action_space.n, num_atoms, Vmin, Vmax,capacity,use_popart)
 if USE_CUDA:
     current_model = rainbow.current_model.cuda()
     target_model = rainbow.target_model.cuda()
@@ -351,17 +356,20 @@ rainbow.hard_update()
 
 
 step=0
-state = env.reset()
+obs = env.reset()
+state = obs[1]  # Use only inform_vector for Rainbow
 for frame_idx in trange(1, num_frames + 1):
     epsilon = epsilon_by_frame(frame_idx)
     action = rainbow.current_model.act(state, epsilon)
 
     ##in airsim
     if env_id == "AirSimEnv-v42":
-        next_state, reward, done, _ = env.step([action])
+        next_obs, reward, done, _ = env.step([action])
+        next_state = next_obs[1]  # Use only inform_vector
         reward=reward/100
     else:
-        next_state, reward, done, _ = env.step(action)
+        next_obs, reward, done, _ = env.step(action)
+        next_state = next_obs[1]  # Use only inform_vector
     rainbow.replay_buffer.push(state, action, reward, next_state, done)
 
     state = next_state
@@ -369,7 +377,8 @@ for frame_idx in trange(1, num_frames + 1):
 
     if done:
         step+=1
-        state = env.reset()
+        obs = env.reset()
+        state = obs[1]  # Use only inform_vector
         all_rewards.append(episode_reward)
         logger.add_scalars('rews',
                            {'rews': episode_reward},
