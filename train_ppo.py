@@ -16,6 +16,7 @@ import numpy as np
 import os
 import collections
 from tqdm import trange
+from fluorescent_trail import apply_fluorescent_trail_to_training
 
 def main():
 
@@ -64,6 +65,11 @@ def main():
     ##You need first start Unreal Editor, then the initialization can be completed
     env = AirSimEnv(need_render=False)
     env.seed(args.seed)
+    
+    # 激活超酷荧光轨迹效果
+    trail_controller = apply_fluorescent_trail_to_training()
+    if trail_controller:
+        print("荧光轨迹已激活！训练过程中按 'T' 键查看超酷轨迹")
 
     #Policy network
     if args.continue_last:
@@ -131,6 +137,13 @@ def main():
     success_deque=collections.deque(maxlen=100)
 
     for episode in trange(episodes):
+        
+        # 每20个episode变换一次荧光轨迹颜色
+        if trail_controller and episode % 20 == 0:
+            effects = ["electric_blue", "toxic_green", "hot_pink", "cyber_purple", "plasma"]
+            effect = effects[episode // 20 % len(effects)]
+            trail_controller.set_neon_trail(effect)
+            print(f"轨迹颜色变换为: {effect}")
 
         if args.use_linear_lr_decay:
             # decrease learning rate linearly
@@ -190,12 +203,12 @@ def main():
                 total_rew=0
                 total_step=0
 
-            img = obs[0]
-            img = np.hstack(img)
-            img = np.array(img, dtype=np.uint8)
-            #img = np.array(obs[0][0] , dtype=np.uint8)
-            cv2.imshow("0", img)
-            cv2.waitKey(1)
+            # 注释掉图像显示窗口，避免弹出小窗口
+            # img = obs[0]
+            # img = np.hstack(img)
+            # img = np.array(img, dtype=np.uint8)
+            # cv2.imshow("0", img)
+            # cv2.waitKey(1)
 
             # If done then clean the history of observations.
             # insert data in buffer
