@@ -22,12 +22,15 @@ def main():
     
     # 展示不同的荧光效果
     effects = [
+        ("超细轨迹", "ultra_thin"),
+        ("激光红", "laser_red"),
+        ("幽灵白", "ghost_white"),
         ("电子蓝", "electric_blue"),
         ("毒液绿", "toxic_green"), 
         ("热粉色", "hot_pink"),
         ("赛博紫", "cyber_purple"),
-        ("等离子体", "plasma"),
-        ("彩虹", "rainbow")
+        ("霓虹橙", "neon_orange"),
+        ("等离子体", "plasma")
     ]
     
     for name, effect in effects:
