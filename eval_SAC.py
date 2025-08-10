@@ -17,7 +17,7 @@ from tqdm import trange
 from pathlib import Path
 from torch.distributions import Categorical,Independent
 import cv2
-INCORPORATE = 7
+INCORPORATE = 9
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
 

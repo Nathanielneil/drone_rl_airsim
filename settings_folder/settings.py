@@ -120,7 +120,7 @@ window_restart_ctr_threshold = 2  # how many times we are allowed to restart the
 
 #-------------------------------
 #control mode
-control_mode="Discrete" # "moveByVelocity" "Discrete"
+control_mode="moveByVelocity" # "moveByVelocity" "Discrete"
 
 #-------------------------------
 #algorithm
