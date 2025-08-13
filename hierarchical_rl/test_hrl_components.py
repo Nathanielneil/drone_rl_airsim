@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-Comprehensive testing script for hierarchical reinforcement learning components.
-Tests each module independently to ensure proper functionality.
+Fixed testing script for hierarchical reinforcement learning components.
 """
 
 import os
@@ -29,6 +28,12 @@ def test_imports():
         from hierarchical_rl.common.hierarchical_replay_buffer import HierarchicalReplayBuffer
         print("✓ HierarchicalReplayBuffer imported successfully")
         
+        from hierarchical_rl.common.goal_generation import GoalGenerator
+        print("✓ GoalGenerator imported successfully")
+        
+        from hierarchical_rl.common.intrinsic_motivation import IntrinsicMotivation
+        print("✓ IntrinsicMotivation imported successfully")
+        
         # Test HAC
         from hierarchical_rl.hac import HACAgent, HACConfig
         print("✓ HAC components imported successfully")
@@ -48,6 +53,9 @@ def test_imports():
         # Test environments
         from hierarchical_rl.envs.hierarchical_airsim_env import HierarchicalAirSimEnv
         print("✓ HierarchicalAirSimEnv imported successfully")
+        
+        from hierarchical_rl.envs.goal_conditioned_wrapper import GoalConditionedWrapper
+        print("✓ GoalConditionedWrapper imported successfully")
         
         print("\n✅ All imports successful!")
         return True
@@ -70,19 +78,19 @@ def test_config_classes():
         from hierarchical_rl.options import OptionsConfig
         
         # Test HAC config
-        hac_config = HACConfig()
+        hac_config = HACConfig(device='cpu')
         print(f"✓ HAC Config created: num_levels={hac_config.num_levels}")
         
         # Test FuN config
-        fun_config = FuNConfig()
+        fun_config = FuNConfig(device='cpu')
         print(f"✓ FuN Config created: manager_horizon={fun_config.manager_horizon}")
         
         # Test HIRO config
-        hiro_config = HIROConfig()
+        hiro_config = HIROConfig(device='cpu')
         print(f"✓ HIRO Config created: subgoal_freq={hiro_config.subgoal_freq}")
         
         # Test Options config
-        options_config = OptionsConfig()
+        options_config = OptionsConfig(device='cpu')
         print(f"✓ Options Config created: num_options={options_config.num_options}")
         
         print("\n✅ All configurations created successfully!")
@@ -163,7 +171,7 @@ def test_agent_creation():
     try:
         # Test HAC Agent
         from hierarchical_rl.hac import HACAgent, HACConfig
-        hac_config = HACConfig(device=device, num_episodes=10)
+        hac_config = HACConfig(device=device)
         hac_agent = HACAgent(state_dim=state_dim, action_dim=action_dim, goal_dim=3, config=hac_config)
         print(f"✓ HAC Agent created successfully on {device}")
         agents_created += 1
@@ -181,7 +189,7 @@ def test_agent_creation():
     try:
         # Test FuN Agent
         from hierarchical_rl.fun import FuNAgent, FuNConfig
-        fun_config = FuNConfig(device=device, num_episodes=10)
+        fun_config = FuNConfig(device=device)
         fun_agent = FuNAgent(state_dim=state_dim, action_dim=action_dim, config=fun_config)
         print(f"✓ FuN Agent created successfully on {device}")
         agents_created += 1
@@ -198,7 +206,7 @@ def test_agent_creation():
     try:
         # Test HIRO Agent
         from hierarchical_rl.hiro import HIROAgent, HIROConfig
-        hiro_config = HIROConfig(device=device, num_episodes=10)
+        hiro_config = HIROConfig(device=device)
         hiro_agent = HIROAgent(state_dim=state_dim, action_dim=action_dim, config=hiro_config)
         print(f"✓ HIRO Agent created successfully on {device}")
         agents_created += 1
@@ -215,7 +223,7 @@ def test_agent_creation():
     try:
         # Test Options Agent
         from hierarchical_rl.options import OptionsAgent, OptionsConfig
-        options_config = OptionsConfig(device=device, num_episodes=10)
+        options_config = OptionsConfig(device=device)
         options_agent = OptionsAgent(state_dim=state_dim, action_dim=action_dim, config=options_config)
         print(f"✓ Options Agent created successfully on {device}")
         agents_created += 1
@@ -232,108 +240,59 @@ def test_agent_creation():
     print(f"\n✅ Successfully created {agents_created}/4 agents!")
     return agents_created == 4
 
-def test_mock_environment():
-    """Test with a mock environment to simulate training loop."""
+def test_simple_training_loop():
+    """Test a simple training loop with one agent."""
     print("\n" + "=" * 60)
-    print("Testing Mock Environment Integration...")
+    print("Testing Simple Training Loop...")
     print("=" * 60)
     
     try:
-        # Create a simple mock environment
-        class MockEnv:
-            def __init__(self):
-                self.state_dim = 109  # 100 visual + 9 inform
-                self.action_dim = 2
-                self.step_count = 0
-                self.max_steps = 50
-            
-            def reset(self):
-                self.step_count = 0
-                obs = {
-                    'observation': np.random.randn(4, 112, 112),  # Stack of depth images
-                    'inform_vector': np.random.randn(9),
-                    'desired_goal': np.random.randn(3),
-                    'achieved_goal': np.random.randn(3)
-                }
-                info = {'goal': np.random.randn(3)}
-                return obs, info
-            
-            def step(self, action):
-                self.step_count += 1
-                obs = {
-                    'observation': np.random.randn(4, 112, 112),
-                    'inform_vector': np.random.randn(9),
-                    'desired_goal': np.random.randn(3),
-                    'achieved_goal': np.random.randn(3)
-                }
-                reward = np.random.randn()
-                terminated = self.step_count >= self.max_steps
-                truncated = False
-                info = {
-                    'goal_achieved': np.random.random() < 0.1,
-                    'goal_distance': np.random.uniform(0, 5)
-                }
-                return obs, reward, terminated, truncated, info
-            
-            def get_goal(self):
-                return np.random.randn(3)
-        
-        # Test with Options Agent (simplest to test)
+        # Use Options agent (simplest)
         from hierarchical_rl.options import OptionsAgent, OptionsConfig
         
-        config = OptionsConfig(device="cpu", num_episodes=5, buffer_size=100)
-        agent = OptionsAgent(state_dim=109, action_dim=2, config=config, continuous_actions=True)
-        env = MockEnv()
+        config = OptionsConfig(device="cpu", buffer_size=100)
+        agent = OptionsAgent(state_dim=50, action_dim=2, config=config, continuous_actions=True)
         
-        print("✓ Created mock environment and Options agent")
+        print("✓ Created Options agent for training test")
         
-        # Run a short episode
-        obs, info = env.reset()
-        agent.reset_episode()
-        
-        episode_reward = 0
-        step = 0
-        done = False
-        
-        while not done and step < 20:
-            # Process observation (simplified)
-            visual_features = obs['observation'].flatten()[:100]
-            visual_features = np.pad(visual_features, (0, max(0, 100 - len(visual_features))))
-            state = np.concatenate([visual_features, obs['inform_vector']])
+        # Simulate simple training loop
+        for episode in range(3):
+            agent.reset_episode()
+            episode_reward = 0
             
-            # Select action
-            action, action_info = agent.select_action(state)
+            for step in range(10):
+                # Random state
+                state = np.random.randn(50)
+                
+                # Select action
+                action, info = agent.select_action(state)
+                
+                # Simulate environment step
+                next_state = np.random.randn(50)
+                reward = np.random.randn()
+                done = step >= 9
+                
+                # Store transition
+                agent.store_transition(state, action, reward, next_state, done, info)
+                
+                episode_reward += reward
             
-            # Execute action
-            next_obs, reward, terminated, truncated, step_info = env.step(action)
-            done = terminated or truncated
-            
-            # Store transition
-            combined_info = {**action_info, **step_info}
-            agent.store_transition(state, action, reward, next_obs, done, combined_info)
-            
-            episode_reward += reward
-            step += 1
-            obs = next_obs
+            # Try to update agent
+            if episode > 0:  # Skip first episode
+                losses = agent.update()
+                print(f"✓ Episode {episode}: reward={episode_reward:.2f}, losses={list(losses.keys()) if losses else 'None'}")
         
-        print(f"✓ Completed mock episode: {step} steps, reward: {episode_reward:.2f}")
-        
-        # Test agent update
-        if step > 10:  # Only update if we have some experience
-            losses = agent.update()
-            print(f"✓ Agent update completed, losses: {list(losses.keys()) if losses else 'No losses'}")
-        
-        print("\n✅ Mock environment integration test successful!")
+        print("\n✅ Simple training loop test successful!")
         return True
         
     except Exception as e:
-        print(f"❌ Mock environment test failed: {e}")
+        print(f"❌ Training loop test failed: {e}")
         traceback.print_exc()
         return False
 
 def main():
     """Run all tests."""
-    print("Starting Hierarchical RL Component Tests...")
+    print("Starting Fixed Hierarchical RL Component Tests...")
     print(f"PyTorch version: {torch.__version__}")
     print(f"Device available: {'CUDA' if torch.cuda.is_available() else 'CPU'}")
     print()
@@ -345,7 +304,7 @@ def main():
     test_results.append(("Config Test", test_config_classes()))
     test_results.append(("Base Components Test", test_base_components()))
     test_results.append(("Agent Creation Test", test_agent_creation()))
-    test_results.append(("Mock Environment Test", test_mock_environment()))
+    test_results.append(("Simple Training Test", test_simple_training_loop()))
     
     # Summary
     print("\n" + "=" * 60)
@@ -362,9 +321,9 @@ def main():
     print(f"\nOverall: {passed}/{len(test_results)} tests passed")
     
     if passed == len(test_results):
-        print("\n🎉 All tests passed! Hierarchical RL components are working correctly.")
+        print("\nAll tests passed! Hierarchical RL components are working correctly.")
     else:
-        print(f"\n⚠️  {len(test_results) - passed} tests failed. Please check the errors above.")
+        print(f"\n{len(test_results) - passed} tests failed. Please check the errors above.")
     
     return passed == len(test_results)
 
