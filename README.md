@@ -112,46 +112,13 @@ drone_rl/
 
 ## Quick Start
 
-### Option 1: Docker (Recommended)
-
-#### Prerequisites
-- Docker Engine 20.10+
-- NVIDIA Docker runtime (for GPU support)
-- Docker Compose 1.28+
-
-#### Quick Start with Docker
-```bash
-git clone https://github.com/Nathanielneil/drone_rl_airsim.git
-cd drone_rl_airsim
-
-# Simple training with GPU
-docker-compose up drone-rl-gpu
-
-# Development environment
-docker-compose up dev
-
-# Jupyter Lab for experimentation
-docker-compose up jupyter
-```
-
-#### Custom Docker Commands
-```bash
-# Build image
-./docker/build.sh
-
-# Run interactive development
-./docker/run.sh --dev
-
-# Start specific training
-./docker/run.sh --training ppo
-```
-
-### Option 2: Local Installation
+### Local Installation (Recommended)
 
 #### Prerequisites
 ```bash
-# Ensure AirSim environment is running
+# System Requirements
 # Ubuntu 20.04 + Unreal Engine 4.27 + AirSim 1.8.1
+# Python 3.7+ with PyTorch 1.7+
 ```
 
 #### Installation
@@ -165,6 +132,9 @@ pip install -r requirements.txt
 ```bash
 # Edit machine-specific paths
 nano settings_folder/machine_dependent_settings.py
+
+# Ensure AirSim environment is running
+# Launch AirSim Blocks environment before training
 ```
 
 ## Training Commands
