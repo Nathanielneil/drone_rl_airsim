@@ -36,6 +36,15 @@ This repository implements a complete suite of reinforcement learning algorithms
 | **A3C** | `a3c.py` | Newly Completed | Discrete | Asynchronous advantage actor-critic |
 | **DDPG** | `ddpg.py` | Enhanced Twin-Critic | Continuous | Deterministic policy gradients |
 
+### Hierarchical Reinforcement Learning (New!)
+
+| Algorithm | Implementation | Status | Type | Key Features |
+|-----------|---------------|---------|------|--------------|
+| **HAC** | `hierarchical_rl/hac/` | Production Ready | Hierarchical | Goal-conditioned multi-level learning |
+| **HIRO** | `hierarchical_rl/hiro/` | Available | Hierarchical | Off-policy hierarchical learning |
+| **FUN** | `hierarchical_rl/fun/` | Available | Hierarchical | Feudal networks for temporal abstraction |
+| **Options** | `hierarchical_rl/options/` | Available | Hierarchical | Semi-Markov option-based learning |
+
 ### Extended Algorithm Suite (Baselines)
 | Algorithm | Implementation | Status |
 |-----------|---------------|---------|
@@ -73,6 +82,16 @@ drone_rl/
 │   ├── DQN/                      # DQN supporting modules
 │   ├── Rainbow/                  # Rainbow DQN components
 │   └── utils/                    # Shared utilities and helpers
+│
+├── Hierarchical RL Suite
+│   ├── hierarchical_rl/          # Complete HRL framework
+│   │   ├── hac/                  # HAC: Hindsight Action Control
+│   │   ├── hiro/                 # HIRO: Off-policy hierarchical RL
+│   │   ├── fun/                  # FUN: Feudal networks
+│   │   ├── options/              # Options framework
+│   │   ├── envs/                 # Goal-conditioned environments
+│   │   └── common/               # Shared HRL components
+│   └── train_hac_fixed.py        # HAC training script (fixed version)
 │
 ├── Environment Integration
 │   ├── gym_airsim/              # AirSim-Gym interface
@@ -176,6 +195,18 @@ python td3.py                 # Twin delayed DDPG (twin critics)
 python ddpg.py                # Enhanced DDPG with twin critics
 ```
 
+### Hierarchical Reinforcement Learning
+```bash
+# Hierarchical algorithms for complex goal-oriented tasks
+python train_hac_fixed.py     # HAC: Multi-level goal-conditioned learning (recommended)
+
+# Alternative HRL algorithms (development versions)
+cd hierarchical_rl
+python train_hierarchical.py --algorithm hiro    # HIRO: Off-policy HRL
+python train_hierarchical.py --algorithm fun     # FUN: Feudal networks
+python train_hierarchical.py --algorithm options # Options framework
+```
+
 ### Configuration
 ```bash
 # Switch control modes in settings_folder/settings.py:
@@ -203,12 +234,15 @@ python -m baselines.run --alg=trpo_mpi --env=AirGym
 | **Distributed training** | A3C | Discrete | Asynchronous parallel learning |
 | **Sample efficiency** | TD3, SAC | Continuous | Advanced off-policy methods |
 | **Imitation learning** | GAIL | Both | Learn from expert demonstrations |
-| **Goal-oriented tasks** | HER | Both | Learns from failed attempts |
+| **Goal-oriented tasks** | HER, HAC | Both | Learns from failed attempts |
+| **Complex navigation** | HAC | Continuous | Multi-level hierarchical planning |
+| **Long-horizon tasks** | HAC, HIRO | Continuous | Temporal abstraction and subgoals |
 
 ### Quick Decision Tree:
 - **New to RL?** → Start with **PPO** (most forgiving)
 - **Need discrete actions?** → Use **Rainbow DQN** (best Q-learning)
 - **Want smooth control?** → Choose **SAC** (entropy-based) or **TD3** (deterministic)
+- **Complex goal-oriented tasks?** → Try **HAC** (hierarchical learning)
 - **Research cutting-edge?** → Try **TD3** or enhanced **DDPG**
 
 ## Technical Requirements
@@ -232,7 +266,15 @@ tensorboard --logdir=runs/
 
 ## Latest Features & Improvements
 
+### Major Update: Hierarchical Reinforcement Learning Suite
+- **HAC Algorithm Fixed**: Resolved UAV hovering issue with proper action scaling and network initialization
+- **Complete HRL Framework**: Added HAC, HIRO, FUN, and Options algorithms for complex navigation tasks
+- **Goal-Conditioned Environments**: New environment wrappers supporting hierarchical learning
+- **Multi-Level Navigation**: HAC now successfully navigates UAVs toward goals with temporal abstraction
+
 ### Algorithm Enhancements
+- **HAC Action Scaling Fix**: Corrected action scaling from [-1,1] to [-2,2] for proper UAV movement
+- **Enhanced Network Architecture**: Improved weight initialization and tanh activation for stable training
 - **A3C Complete Implementation**: Full training loop, loss computation, and network architecture
 - **DDPG Twin-Critic Version**: Enhanced stability with dual Q-networks (TD3-inspired)
 - **Unified State Handling**: All algorithms now properly handle 9-dimensional inform_vector
@@ -254,9 +296,11 @@ tensorboard --logdir=runs/
 - **Photorealistic 3D environments** powered by Unreal Engine 4.27
 - **Physics-accurate drone dynamics** via AirSim
 - **Dual control modes**: Discrete actions & continuous velocity control
+- **Hierarchical goal-conditioned environments** for complex navigation tasks
 - **Intelligent collision handling** with progressive recovery
 - **9-dimensional state space**: position, velocity, orientation, and goal information
 - **Real-time obstacle generation and randomization**
+- **Multi-level reward structures** supporting hierarchical learning
 
 ## Contributing
 
