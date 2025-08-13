@@ -10,7 +10,14 @@ This directory contains a comprehensive suite of state-of-the-art hierarchical r
 ### Run All Algorithm Tests
 ```bash
 cd hierarchical_rl
-python launch_hierarchical_training.py --test-all
+# Comprehensive AirSim integration testing
+python test_advanced_algorithms.py
+
+# Basic functionality verification
+python test_basic_functionality.py
+
+# Component-level testing
+python test_hrl_components.py
 ```
 
 ### Train Specific Algorithms
@@ -37,12 +44,12 @@ python launch_hierarchical_training.py --benchmark
 
 ## Algorithm Status & Performance
 
-| Algorithm | Status | Implementation | Key Features | Recommended Use |
-|-----------|---------|---------------|--------------|-----------------|
-| **HAC** | Production Ready | `hac/` | Multi-level goal learning, HER | **Primary Choice** - Best results |
-| **HIRO** | Enhanced | `hiro/` | Off-policy correction, Goal relabeling | Sample-efficient learning |
-| **FuN** | Enhanced | `fun/` | Manager-worker feudal hierarchy | Complex temporal tasks |
-| **Options** | Enhanced | `options/` | Skill discovery, Temporal abstraction | Diverse behavior learning |
+| Algorithm | Status | Implementation | Key Features | AirSim Integration | Recommended Use |
+|-----------|---------|---------------|--------------|--------------------|-----------------|
+| **HAC** | Production Ready | `hac/` | Multi-level goal learning, HER | Fully Validated | **Primary Choice** - Best results |
+| **HIRO** | Enhanced & Tested | `hiro/` | Off-policy correction, Goal relabeling | Fully Validated | Sample-efficient learning |
+| **FuN** | Enhanced & Tested | `fun/` | Manager-worker feudal hierarchy | Fully Validated | Complex temporal tasks |
+| **Options** | Enhanced & Tested | `options/` | Skill discovery, Temporal abstraction | Fully Validated | Diverse behavior learning |
 
 ---
 
@@ -83,9 +90,11 @@ hierarchical_rl/
 │       └── goal_conditioned_wrapper.py
 │
 ├── Testing & Validation
-│   ├── test_all_algorithms.py  # Comprehensive test suite
-│   ├── test_hrl_components.py  # Component testing
-│   └── eval_hierarchical.py    # Performance evaluation
+│   ├── test_advanced_algorithms.py  # AirSim integration testing
+│   ├── test_basic_functionality.py  # Basic functionality tests  
+│   ├── test_all_algorithms.py       # Comprehensive test suite
+│   ├── test_hrl_components.py       # Component testing
+│   └── eval_hierarchical.py         # Performance evaluation
 │
 ├── Training & Utilities
 │   ├── launch_hierarchical_training.py # Unified launcher
@@ -93,9 +102,9 @@ hierarchical_rl/
 │   └── setup_airsim_config.py  # Environment setup
 │
 └── Documentation
-    ├── README_UPDATED.md       # This file
-    ├── DEBUGGING_LOG.md        # Debug history
-    └── ALGORITHM_COMPARISON.md # Performance comparison
+    ├── README.md                          # This file
+    ├── ADVANCED_ALGORITHM_TEST_REPORT.md  # Comprehensive test report
+    └── DEBUGGING_LOG.md                   # Debug history
 ```
 
 ---
@@ -125,9 +134,9 @@ Level 1 (Low):  Subgoal → Action Execution
 - Action Space: [-2.0, 2.0] for effective UAV movement
 - Collision Recovery: Progressive penalty system
 
-### 2. HIRO (HIerarchical RL with Off-policy correction) - **ENHANCED**
+### 2. HIRO (HIerarchical RL with Off-policy correction) - **ENHANCED & TESTED**
 
-**Status:** Enhanced Implementation
+**Status:** Enhanced Implementation - AirSim Validated
 
 **Key Features:**
 - Two-level hierarchy with high-level and low-level policies
@@ -135,22 +144,25 @@ Level 1 (Low):  Subgoal → Action Execution
 - Advanced Hindsight Experience Replay (HER)
 - Goal relabeling with dense reward computation
 - Twin DDPG critics for stability
+- Validated AirSim integration with environment observation format compatibility
 
 **Enhancements:**
 - Specialized replay buffer with HER integration
 - Off-policy correction mechanisms
 - Advanced goal relabeling strategies
 - Comprehensive logging and monitoring
+- Fixed dimension compatibility and state extraction for AirSim environment
 
-### 3. FuN (FeUdal Networks) - **ENHANCED**
+### 3. FuN (FeUdal Networks) - **ENHANCED & TESTED**
 
-**Status:** Enhanced Implementation
+**Status:** Enhanced Implementation - AirSim Validated
 
 **Key Features:**
 - Manager-worker feudal architecture
 - Intrinsic motivation through cosine similarity
 - Dilated LSTM for temporal abstraction
 - Goal embedding and transition policies
+- Validated AirSim integration with proper temporal abstraction
 
 **Architecture:**
 ```
@@ -164,16 +176,18 @@ Motivation: Cosine(State_Embedding, Goal)
 - Intrinsic reward computation via cosine similarity
 - Feudal hierarchy with proper temporal abstraction
 - PPO-based policy optimization for both levels
+- Environment compatibility fixes and dimension adaptation
 
-### 4. Options Framework - **ENHANCED**
+### 4. Options Framework - **ENHANCED & TESTED**
 
-**Status:** Enhanced Implementation  
+**Status:** Enhanced Implementation - AirSim Validated
 
 **Key Features:**
-- Multiple learned options/skills (6 default)
+- Multiple learned options/skills (4 default, optimized for testing)
 - Option termination conditions
 - Diversity bonuses for skill discovery
 - Semi-Markov decision process formulation
+- Validated AirSim integration with option switching mechanisms
 
 **Components:**
 ```
@@ -188,6 +202,7 @@ Diversity Mechanism: Encourage exploration
 - Comprehensive option analysis and visualization
 - t-SNE visualization of option states
 - Option usage statistics and performance tracking
+- Environment observation format compatibility and safe method calling
 
 ---
 
