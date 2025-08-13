@@ -57,8 +57,13 @@ saved_models/
 AirSim_Precompiled/SimpleMaze/Car_Maze/Binaries/Linux/Car_Maze
 AirSim_Precompiled/SimpleMaze/Car_Maze/Content/Paks/Car_Maze-LinuxNoEditor.pak
 AirSim_Precompiled/LinuxBlocks1.8.1/LinuxNoEditor/Blocks/Binaries/Linux/Blocks
+AirSim_Precompiled/LinuxBlocks1.8.1/LinuxNoEditor/Blocks/Binaries/Linux/core
+AirSim_Precompiled/LinuxBlocks1.8.1/LinuxNoEditor/Blocks/Content/Paks/Blocks-LinuxNoEditor.pak
 AirSim_Precompiled/*/Saved/Logs/
 AirSim_Precompiled/*/Saved/Crashes/
+
+# Debug backup files
+debug_backup/
 
 # OS generated files
 .DS_Store

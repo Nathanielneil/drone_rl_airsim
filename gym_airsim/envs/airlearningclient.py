@@ -176,11 +176,19 @@ class AirLearningClient(object):
 
         self.client.enableApiControl(True)
         self.client.armDisarm(True)
+        
+        # Clear any residual collision state after reset
+        try:
+            collision_info = self.client.simGetCollisionInfo()
+            if collision_info.has_collided:
+                print("清除重置后的残留碰撞状态")
+        except:
+            pass
 
     def unreal_reset(self):
         #!!!这个时间间隔很重要！！！！
         try:
-            print("🔄 Triggering Unreal environment regeneration...")
+            print("Triggering Unreal environment regeneration...")
             self.client.simPause(False)  # Ensure simulation is running
             
             # This triggers UE4 to read EnvGenConfig.json and regenerate environment
@@ -191,21 +199,21 @@ class AirLearningClient(object):
             # Try Unreal-specific reset if available
             try:
                 self.client.resetUnreal(1.5, 2.5)  # Original parameters from AirLearning
-                print("✅ Unreal environment regenerated successfully")
+                print("Unreal environment regenerated successfully")
             except Exception as e:
                 # Fallback to basic reset if resetUnreal is not available
-                print(f"⚠️  resetUnreal not available, using basic reset: {e}")
+                print(f"resetUnreal not available, using basic reset: {e}")
                 self.client.reset()
                 
         except Exception as e:
-            print(f"⚠️  Unreal reset failed: {e}")
+            print(f"Unreal reset failed: {e}")
             print("Continuing with basic AirSim reset")
 
 
     def take_continious_action(self, action):
 
         if(settings.control_mode=="moveByVelocity"):
-            action=np.clip(action, -0.3, 0.3)
+            action=np.clip(action, -2.0, 2.0)
 
             detla_x = action[0]
             detla_y = action[1]
@@ -213,8 +221,22 @@ class AirLearningClient(object):
             v_x = v[0] + detla_x
             v_y = v[1] + detla_y
 
+            # 动态更新Z坐标，允许垂直移动，但保持在合理范围内
+            current_pos = self.drone_pos()
+            current_z = current_pos[2]
+            
+            # 根据水平移动幅度轻微调整高度，模拟更自然的飞行
+            z_adjustment = (abs(detla_x) + abs(detla_y)) * 0.1  # 轻微的高度变化
+            target_z = current_z - z_adjustment  # 稍微下降以保持稳定飞行
+            
+            # 限制Z坐标在合理飞行范围内 (AirSim坐标系中负值表示高度)
+            target_z = max(-5.0, min(-0.5, target_z))  # 限制在0.5-5米高度范围内
+            
             yaw_mode = airsim.YawMode(is_rate=False, yaw_or_rate=0)
-            self.client.moveByVelocityZAsync(v_x, v_y, self.z, 0.35, 1, yaw_mode).join()
+            self.client.moveByVelocityZAsync(v_x, v_y, target_z, 0.35, 1, yaw_mode).join()
+            
+            # 更新内部Z状态
+            self.z = target_z
 
         else:
             raise NotImplementedError
@@ -222,6 +244,11 @@ class AirLearningClient(object):
         # Use new collision detection API
         collision_info = self.client.simGetCollisionInfo()
         collided = collision_info.has_collided
+        
+        # Clear collision state after reading to prevent false positives
+        if collided:
+            # Wait briefly for collision state to be processed
+            time.sleep(0.1)
 
         return collided
         #Todo : Stabilize drone

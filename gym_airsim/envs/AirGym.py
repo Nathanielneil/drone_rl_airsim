@@ -29,8 +29,8 @@ class AirSimEnv(gym.Env):
         #eithor your speed is more than 2, or your duration is more than 0.4
         #otherwise, it dose not work well !
         if (settings.control_mode == "moveByVelocity"):
-            self.action_space = spaces.Box(np.array([-0.3, -0.3]),
-                                           np.array([+0.3, +0.3]),
+            self.action_space = spaces.Box(np.array([-2.0, -2.0]),
+                                           np.array([+2.0, +2.0]),
                                            dtype=np.float32)
         else:
             self.action_space = spaces.Discrete(8)
@@ -66,6 +66,7 @@ class AirSimEnv(gym.Env):
         self.collision_reset_interval = 5   # 5步后重置计数
         self.safe_zone_radius = 3.0         # 安全区域搜索半径
         self.start_position = None          # 起点位置，用于重置
+        self.prev_distance = None           # 上一步的距离，用于奖励计算
         
         self.seed()
 
@@ -118,17 +119,28 @@ class AirSimEnv(gym.Env):
         return inform
 
     def computeReward(self, now):
-
+        # 计算到目标的距离
         distance_now = np.sqrt(np.power((self.goal[0] - now[0]), 2)
                                + np.power((self.goal[1] - now[1]), 2)
                                )
-        now = self.airgym.drone_pos()[:2]
-        r_yaw = self.airgym.goal_direction(self.goal, now)
+        
+        # 使用传入的位置计算方向
+        now_pos = now[:2]  # 只取X,Y坐标
+        r_yaw = self.airgym.goal_direction(self.goal, now_pos)
 
-        r = -distance_now*0.03#0.02
-
-        if math.cos(r_yaw)>=0:
-            r += self.speed*math.cos(r_yaw)
+        # 距离奖励：距离越近奖励越高
+        r = -distance_now * 0.1  # 增加距离惩罚权重
+        
+        # 方向奖励：朝向目标方向有额外奖励
+        if math.cos(r_yaw) >= 0:
+            r += self.speed * math.cos(r_yaw) * 0.5
+            
+        # 距离改善奖励
+        if hasattr(self, 'prev_distance') and self.prev_distance is not None:
+            distance_improvement = self.prev_distance - distance_now
+            r += distance_improvement * 2.0  # 距离减少时给正奖励
+        
+        self.prev_distance = distance_now
 
         return r
 
@@ -271,6 +283,8 @@ class AirSimEnv(gym.Env):
         # 重置碰撞计数
         self.collision_count = 0
         self.steps_since_collision = 0
+        # 重置距离追踪
+        self.prev_distance = None
         
     def find_safe_position_near_start(self):
         """在起点附近寻找安全区域"""
@@ -336,16 +350,16 @@ class AirSimEnv(gym.Env):
     def reset(self):
 
         # 完全禁用curriculum learning和随机化用于调试
-        print("🔧 Curriculum learning and randomization disabled for testing")
+        print("Curriculum learning and randomization disabled for testing")
         
         if self.need_render:
             self.viewer.geoms.clear()
             self.viewer.onetime_geoms.clear()
         print("enter reset")
         
-        # 设置固定目标，不使用随机化系统
-        self.goal = utils.airsimize_coordinates([10.0, -8.25, 0])
-        print(f"🎯 Fixed goal set to: {self.goal}")
+        # 设置更近的目标，便于学习
+        self.goal = utils.airsimize_coordinates([5.0, -4.0, 0])  # 减少到约6.4米距离
+        print(f"Fixed goal set to: {self.goal} (closer for better learning)")
         
         self.airgym.unreal_reset()
         print("done unreal_resetting")
@@ -354,6 +368,15 @@ class AirSimEnv(gym.Env):
         print("done arisim reseting")
 
         self.airgym.client.takeoffAsync().join()
+        
+        # 清除起飞时的碰撞状态（起飞可能触发误报）
+        time.sleep(0.5)  # 等待起飞完成
+        try:
+            collision_info = self.airgym.client.simGetCollisionInfo()
+            if collision_info.has_collided:
+                print("清除起飞时的误报碰撞状态")
+        except:
+            pass
 
         now = self.airgym.drone_pos()
         
@@ -364,18 +387,25 @@ class AirSimEnv(gym.Env):
 
         ##sometimes there may occur something you can't imagine! Just like your uav is dancing~
 
-        while (-now[2])<0.5:
-            ####TODO:change env
-
-            # 禁用重新随机化，只重启AirSim
-            print("🔧 UAV position issue, restarting without randomization")
-            self.goal = utils.airsimize_coordinates([10.0, -8.25, 0])  # 固定目标
+        # 修复高度检查逻辑：在这个坐标系统中，Z坐标为正数表示高度
+        # 检查无人机是否成功起飞到合理高度（至少0.5米）
+        max_retries = 3  # 限制重试次数避免无限循环
+        retry_count = 0
+        
+        while now[2] < 0.5 and retry_count < max_retries:
+            retry_count += 1
+            print(f"UAV position issue (height: {now[2]:.2f}m), restarting without randomization (attempt {retry_count}/{max_retries})")
+            
+            self.goal = utils.airsimize_coordinates([5.0, -4.0, 0])  # 更近的固定目标
             self.airgym.unreal_reset()
             print("done unreal_resetting")
             time.sleep(4)
             self.airgym.AirSim_reset()
             self.airgym.client.takeoffAsync().join()
             now = self.airgym.drone_pos()
+        
+        if retry_count >= max_retries:
+            print(f"警告：无人机起飞重试达到最大次数，当前高度: {now[2]:.2f}m，继续执行...")
 
         self.airgym.client.moveByVelocityZAsync(0,0,self.airgym.z, 1).join()
 
@@ -392,7 +422,7 @@ class AirSimEnv(gym.Env):
 
     def randomize_env(self):
         # 完全禁用环境随机化用于模型测试
-        print("🔧 Environment randomization disabled for testing")
+        print("Environment randomization disabled for testing")
         
         # 只更新目标位置从配置文件
         try:
