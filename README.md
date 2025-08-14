@@ -25,25 +25,25 @@ This repository implements a complete suite of reinforcement learning algorithms
 
 ### Ready-to-Run Algorithms (Tested & Verified)
 
-| Algorithm | Implementation | Status | Control Mode | Key Features |
-|-----------|---------------|---------|--------------|--------------|
-| **PPO** | `train_ppo.py` | Production Ready | Discrete/Continuous | Stable, sample-efficient, beginner-friendly |
-| **SAC** | `SAC.py` + `eval_SAC.py` | Production Ready | Continuous | Maximum entropy, robust exploration |
-| **TD3** | `td3.py` | Production Ready | Continuous | Twin critics, delayed policy updates |
-| **DQN** | `dqn.py` | Production Ready | Discrete | Classic deep Q-learning |
-| **Rainbow DQN** | `rainbow.py` | Production Ready | Discrete | Multi-component DQN enhancement |
-| **Prioritized DQN** | `prioritized_dqn.py` | Production Ready | Discrete | Experience replay prioritization |
-| **A3C** | `a3c.py` | Newly Completed | Discrete | Asynchronous advantage actor-critic |
-| **DDPG** | `ddpg.py` | Enhanced Twin-Critic | Continuous | Deterministic policy gradients |
+| Algorithm | Implementation | Control Mode | Key Features |
+|-----------|---------------|--------------|--------------|
+| **PPO** | `train_ppo.py` | Discrete/Continuous | Stable, sample-efficient, beginner-friendly |
+| **SAC** | `SAC.py` + `eval_SAC.py` | Continuous | Maximum entropy, robust exploration |
+| **TD3** | `td3.py` | Continuous | Twin critics, delayed policy updates |
+| **DQN** | `dqn.py` | Discrete | Classic deep Q-learning |
+| **Rainbow DQN** | `rainbow.py` | Discrete | Multi-component DQN enhancement |
+| **Prioritized DQN** | `prioritized_dqn.py` | Discrete | Experience replay prioritization |
+| **A3C** | `a3c.py` | Discrete | Asynchronous advantage actor-critic |
+| **DDPG** | `ddpg.py` | Continuous | Deterministic policy gradients |
 
 ### Hierarchical Reinforcement Learning (New!)
 
-| Algorithm | Implementation | Status | Type | Key Features |
-|-----------|---------------|---------|------|--------------|
-| **HAC** | `hierarchical_rl/hac/` | Production Ready | Hierarchical | Goal-conditioned multi-level learning |
-| **HIRO** | `hierarchical_rl/hiro/` | Available | Hierarchical | Off-policy hierarchical learning |
-| **FUN** | `hierarchical_rl/fun/` | Available | Hierarchical | Feudal networks for temporal abstraction |
-| **Options** | `hierarchical_rl/options/` | Available | Hierarchical | Semi-Markov option-based learning |
+| Algorithm | Implementation | Type | Key Features |
+|-----------|---------------|------|--------------|
+| **HAC** | `hierarchical_rl/hac/` | Hierarchical | Goal-conditioned multi-level learning |
+| **HIRO** | `hierarchical_rl/hiro/` | Hierarchical | Off-policy hierarchical learning |
+| **FUN** | `hierarchical_rl/fun/` | Hierarchical | Feudal networks for temporal abstraction |
+| **Options** | `hierarchical_rl/options/` | Hierarchical | Semi-Markov option-based learning |
 
 ### Extended Algorithm Suite (Baselines)
 | Algorithm | Implementation | Status |
