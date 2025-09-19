@@ -1,0 +1,36 @@
+# PPO (Proximal Policy Optimization) configuration
+algorithm: "ppo"
+
+# PPO specific parameters
+ppo:
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  clip_range_vf: null
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  
+# Network architecture
+network:
+  policy_network:
+    hidden_sizes: [64, 64]
+    activation: "tanh"
+  value_network:
+    hidden_sizes: [64, 64]
+    activation: "tanh"
+    
+# Training settings
+training:
+  total_timesteps: 1000000
+  eval_episodes: 10
+  eval_freq: 25000
+  
+# Environment specific
+env:
+  normalize: true
+  n_envs: 1  # AirSim typically uses single environment

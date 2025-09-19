@@ -1,0 +1,24 @@
+# Requirements for evaluation and analysis
+# Include base requirements
+-r base.txt
+
+# Analysis and visualization
+plotly>=5.0.0
+bokeh>=2.4.0
+streamlit>=1.20.0
+
+# Statistical analysis
+scipy>=1.9.0
+scikit-learn>=1.1.0
+statsmodels>=0.13.0
+
+# Report generation
+jinja2>=3.1.0
+markdown>=3.4.0
+
+# Video analysis
+moviepy>=1.0.3
+
+# Performance profiling
+line-profiler>=4.0.0
+py-spy>=0.3.0

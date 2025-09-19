@@ -1,0 +1,75 @@
+# AirSim environment configuration
+environment:
+  name: "AirSimEnv"
+  version: "v42"
+  
+# AirSim connection settings
+airsim:
+  host: "127.0.0.1"
+  port: 41451
+  timeout: 60
+  vehicle_name: "SimpleFlight"
+  
+# Sensor configuration
+sensors:
+  camera:
+    name: "front_center"
+    image_type: "DepthVis"  # Scene, DepthVis, DepthPlanar, Segmentation, SurfaceNormals
+    width: 84
+    height: 84
+    fov: 90
+  
+  # IMU and other sensors
+  imu:
+    enabled: true
+    name: "imu"
+    
+  gps:
+    enabled: false
+    name: "gps"
+
+# Flight dynamics
+flight:
+  max_velocity: 10.0  # m/s
+  max_altitude: 50.0  # meters
+  min_altitude: -10.0  # meters
+  takeoff_height: 2.0  # meters
+  
+# Action space
+action_space:
+  type: "continuous"  # continuous or discrete
+  continuous:
+    low: [-1.0, -1.0, -1.0]  # vx, vy, vz
+    high: [1.0, 1.0, 1.0]
+  discrete:
+    actions: ["forward", "backward", "left", "right", "up", "down", "stop"]
+    
+# Observation space
+observation_space:
+  image:
+    shape: [84, 84, 1]  # height, width, channels
+    dtype: "uint8"
+  state:
+    # position (x, y, z), velocity (vx, vy, vz), orientation (roll, pitch, yaw)
+    shape: [9]
+    dtype: "float32"
+    
+# Reward function
+reward:
+  collision_penalty: -100.0
+  goal_reward: 100.0
+  distance_reward_scale: 1.0
+  velocity_penalty_scale: -0.1
+  time_penalty: -0.01
+  
+# Episode settings
+episode:
+  max_steps: 1000
+  timeout_seconds: 300
+  reset_on_collision: true
+  
+# Safety settings
+safety:
+  enable_collision_detection: true
+  min_safe_distance: 1.0  # meters
+  emergency_landing_threshold: 0.5  # meters from ground

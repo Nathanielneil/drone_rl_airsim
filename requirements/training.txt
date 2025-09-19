@@ -1,0 +1,26 @@
+# Additional requirements for training
+# Include base requirements
+-r base.txt
+
+# Additional training dependencies
+# Memory profiling
+psutil>=5.9.0
+memory-profiler>=0.60.0
+
+# Hyperparameter optimization
+optuna>=3.0.0
+ray[tune]>=2.0.0
+
+# Distributed training
+torch-distributed>=0.1.0
+
+# Advanced RL libraries
+rllib>=2.0.0
+
+# Video recording
+ffmpeg-python>=0.2.0
+
+# Development tools
+ipython>=8.0.0
+jupyter>=1.0.0
+notebook>=6.4.0

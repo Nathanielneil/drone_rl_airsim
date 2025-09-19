@@ -1,0 +1,38 @@
+# Default configuration for Drone RL AirSim
+# This file contains default settings that can be overridden by algorithm-specific configs
+
+# Environment settings
+env:
+  name: "AirSimEnv-v42"
+  max_episode_steps: 1000
+  action_space_type: "continuous"  # or "discrete"
+  observation_space_type: "mixed"  # image + state
+  
+# Training settings
+training:
+  total_timesteps: 300000
+  batch_size: 256
+  learning_rate: 0.0003
+  gamma: 0.99
+  device: "cuda"  # or "cpu"
+  seed: 1
+  
+# Logging and evaluation
+logging:
+  log_interval: 1000
+  eval_interval: 10000
+  save_interval: 50000
+  tensorboard_log_dir: "experiments/logs"
+  
+# Model saving
+model:
+  save_dir: "models"
+  checkpoint_frequency: 10000
+  
+# AirSim specific
+airsim:
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "SimpleFlight"
+  camera_name: "front_center"
+  image_type: "DepthVis"
