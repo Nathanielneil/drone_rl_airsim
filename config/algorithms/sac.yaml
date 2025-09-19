@@ -6,7 +6,7 @@ sac:
   learning_rate: 0.0003
   buffer_size: 1000000
   learning_starts: 10000
-  batch_size: 256
+  batch_size: 256              # GPU可增加到512或更大
   tau: 0.005
   gamma: 0.99
   train_freq: 1
@@ -14,6 +14,12 @@ sac:
   target_update_interval: 1
   ent_coef: "auto"
   target_entropy: "auto"
+  
+# GPU特定设置 (当device为cuda时生效)
+gpu_settings:
+  batch_size_gpu: 512          # GPU时使用更大批次
+  buffer_size_gpu: 2000000     # GPU时使用更大缓存
+  mixed_precision: false       # 混合精度训练
   
 # Network architecture
 network:

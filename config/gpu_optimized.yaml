@@ -1,0 +1,51 @@
+# GPU优化训练配置
+# 适用于拥有NVIDIA GPU的系统
+
+# 训练设置
+training:
+  device: "cuda"                 # 强制使用CUDA
+  total_timesteps: 2000000      # GPU可以处理更长训练
+  batch_size: 512               # GPU可以处理更大批次
+  learning_rate: 0.0003
+  gamma: 0.99
+  seed: 1
+
+# 环境设置  
+env:
+  name: "AirSimEnv-v42"
+  max_episode_steps: 1500       # GPU可以处理更长episode
+  action_space_type: "continuous"
+  observation_space_type: "mixed"
+
+# 日志设置
+logging:
+  log_interval: 500             # 更频繁的日志记录
+  eval_interval: 5000           # 更频繁的评估
+  save_interval: 25000
+  tensorboard_log_dir: "experiments/logs"
+
+# 模型保存
+model:
+  save_dir: "models"
+  checkpoint_frequency: 5000    # 更频繁的检查点保存
+
+# AirSim设置
+airsim:
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "SimpleFlight"
+  camera_name: "front_center"
+  image_type: "DepthVis"
+
+# GPU特定优化
+gpu_optimization:
+  # 混合精度训练 (需要支持的GPU)
+  mixed_precision: false        # 可设置为true以节省显存
+  
+  # 显存管理
+  memory_fraction: 0.9          # 使用90%的GPU显存
+  allow_growth: true            # 动态分配显存
+  
+  # 并行处理
+  dataloader_workers: 4         # 数据加载并行度
+  pin_memory: true              # 固定内存以加速GPU传输
