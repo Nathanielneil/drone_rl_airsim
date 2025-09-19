@@ -1,17 +1,18 @@
 <div align="center">
 
-# UAV Reinforcement Learning Suite
+# Modern UAV Reinforcement Learning Suite
 
-**A comprehensive collection of state-of-the-art reinforcement learning algorithms for unmanned aerial vehicle navigation and control**
+**Next-generation reinforcement learning algorithms optimized for Windows 10 + AirSim 1.8.1 + CUDA 12.1**
 
-[![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-1.7+-red.svg)](https://pytorch.org/)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.1.2+cu121-red.svg)](https://pytorch.org/)
 [![AirSim](https://img.shields.io/badge/AirSim-1.8.1-green.svg)](https://microsoft.github.io/AirSim/)
-[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg)](https://www.docker.com/)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04-orange.svg)](https://ubuntu.com/)
+[![CUDA](https://img.shields.io/badge/CUDA-12.1-76B900.svg)](https://developer.nvidia.com/cuda-toolkit)
+[![Windows](https://img.shields.io/badge/Windows-10+-0078D4.svg)](https://www.microsoft.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-*Powered by Ubuntu 20.04 • Unreal Engine 4.27 • AirSim 1.8.1*<br>
+*Optimized for Windows 10 • Unreal Engine 4.27.2 • AirSim 1.8.1 • CUDA 12.1*<br>
+*Modern Architecture • Mixed Precision Training • GPU Optimization*<br>
 *Email:guowei_ni@bit.edu.cn*
 </div>
 
@@ -19,22 +20,31 @@
 
 ## Project Overview
 
-This repository implements a complete suite of reinforcement learning algorithms specifically designed for UAV autonomous navigation, obstacle avoidance in realistic 3D environments. From classic value-based methods to cutting-edge actor-critic algorithms, this collection provides researchers and developers with battle-tested implementations ready for real-world drone applications.
+This repository implements a **modern, GPU-optimized** suite of reinforcement learning algorithms specifically designed for UAV autonomous navigation. Fully optimized for **Windows 10 + AirSim 1.8.1 + CUDA 12.1**, featuring mixed precision training, asynchronous processing, and intelligent performance monitoring for maximum training efficiency.
+
+### 🚀 **New Features (2024)**
+- **CUDA 12.1 Optimization**: Native support for latest CUDA with TF32 acceleration
+- **Mixed Precision Training**: Up to 2x faster training with AMP (Automatic Mixed Precision)
+- **Modern Architecture**: Gymnasium interface, OmegaConf configuration, async processing
+- **Windows Optimization**: Performance tuning, GPU monitoring, intelligent memory management
+- **Real-time Monitoring**: Live GPU metrics, performance analytics, automated optimization
 
 ## Algorithm Arsenal
 
-### Ready-to-Run Algorithms (Tested & Verified)
+### 🔥 **Modern Optimized Algorithms**
 
-| Algorithm | Implementation | Control Mode | Key Features |
-|-----------|---------------|--------------|--------------|
-| **PPO** | `train_ppo.py` | Discrete/Continuous | Stable, sample-efficient, beginner-friendly |
-| **SAC** | `SAC.py` + `eval_SAC.py` | Continuous | Maximum entropy, robust exploration |
-| **TD3** | `td3.py` | Continuous | Twin critics, delayed policy updates |
-| **DQN** | `dqn.py` | Discrete | Classic deep Q-learning |
-| **Rainbow DQN** | `rainbow.py` | Discrete | Multi-component DQN enhancement |
-| **Prioritized DQN** | `prioritized_dqn.py` | Discrete | Experience replay prioritization |
-| **A3C** | `a3c.py` | Discrete | Asynchronous advantage actor-critic |
-| **DDPG** | `ddpg.py` | Continuous | Deterministic policy gradients |
+| Algorithm | Implementation | CUDA 12.1 | Mixed Precision | Key Features |
+|-----------|---------------|------------|-----------------|--------------|
+| **Modern SAC** | `scripts/modern_train.py` | ✅ | ✅ | GPU-optimized, async processing, AirSim 1.8.1 |
+| **Modern PPO** | `train_ppo.py` | ✅ | ✅ | Stable, sample-efficient, beginner-friendly |
+| **Legacy SAC** | `SAC.py` + `eval_SAC.py` | ⚠️ | ❌ | Maximum entropy, robust exploration |
+| **TD3** | `td3.py` | ⚠️ | ❌ | Twin critics, delayed policy updates |
+| **DQN** | `dqn.py` | ⚠️ | ❌ | Classic deep Q-learning |
+| **Rainbow DQN** | `rainbow.py` | ⚠️ | ❌ | Multi-component DQN enhancement |
+| **A3C** | `a3c.py` | ⚠️ | ❌ | Asynchronous advantage actor-critic |
+| **DDPG** | `ddpg.py` | ⚠️ | ❌ | Deterministic policy gradients |
+
+> 💡 **Recommendation**: Use **Modern SAC** (`scripts/modern_train.py`) for best performance with Windows 10 + CUDA 12.1
 
 ### Hierarchical Reinforcement Learning (New!)
 
@@ -112,41 +122,66 @@ drone_rl/
 
 ## Quick Start
 
-### Local Installation (Recommended)
+### 🚀 **Modern Installation (Windows 10 + CUDA 12.1)**
 
 #### Prerequisites
 ```bash
 # System Requirements
-# Ubuntu 20.04 + Unreal Engine 4.27 + AirSim 1.8.1
-# Python 3.7+ with PyTorch 1.7+
+✅ Windows 10/11 (64-bit)
+✅ CUDA 12.1 + cuDNN 8.9+
+✅ Unreal Engine 4.27.2 + AirSim 1.8.1
+✅ Python 3.9+ (Recommended: 3.11)
+✅ 16GB+ RAM, 8GB+ VRAM (RTX 3080+ recommended)
 ```
 
-#### Installation
+#### 🔧 **Automated Installation**
 ```bash
 git clone https://github.com/Nathanielneil/drone_rl_airsim.git
 cd drone_rl_airsim
-pip install -r requirements.txt
+
+# Option 1: Full Windows + CUDA 12.1 setup (Recommended)
+scripts/install_windows_cuda121.bat
+
+# Option 2: Manual installation
+pip install -r requirements_windows_cuda121.txt
 ```
 
-#### Configuration
+#### 🔍 **Environment Verification**
 ```bash
-# Edit machine-specific paths
-nano settings_folder/machine_dependent_settings.py
+# Check compatibility and performance
+python scripts/check_cuda_compatibility.py
 
-# Ensure AirSim environment is running
-# Launch AirSim Blocks environment before training
+# Verify AirSim connection
+python -c "from src.environments.airsim_env.modern_airsim_env import ModernAirSimEnv; print('✅ AirSim ready')"
 ```
 
 ## Training Commands
 
-### Quick Start (Recommended)
+### 🏃‍♂️ **Modern Training (Optimized)**
 ```bash
-# For beginners - most stable algorithm
-python train_ppo.py
+# 🔥 MODERN SAC - Best performance with CUDA 12.1
+python scripts/modern_train.py --algorithm sac --device cuda
 
-# For continuous control enthusiasts
-python SAC.py                 # Training
-python eval_SAC.py            # Evaluation
+# 🎯 MODERN SAC with custom settings
+python scripts/modern_train.py \
+    --algorithm sac \
+    --total-timesteps 1000000 \
+    --batch-size 512 \
+    --learning-rate 3e-4 \
+    --env-host 127.0.0.1 \
+    --tensorboard-log experiments/logs
+
+# 🚀 Quick performance test
+python scripts/modern_train.py --total-timesteps 10000 --experiment-name quick_test
+```
+
+### 📊 **Performance Monitoring**
+```bash
+# Real-time training monitoring
+tensorboard --logdir experiments/logs
+
+# Performance analysis
+python -c "from src.utils.performance.gpu_manager import get_performance_monitor; monitor = get_performance_monitor(); print(monitor.get_detailed_stats())"
 ```
 
 ### Discrete Control Algorithms
@@ -217,15 +252,24 @@ python -m baselines.run --alg=trpo_mpi --env=AirGym
 
 ## Technical Requirements
 
-| Component | Version | Purpose |
-|-----------|---------|---------|
-| **Python** | 3.7+ | Core runtime |
-| **PyTorch** | 1.7+ | Deep learning framework |
-| **AirSim** | 1.8.1 | Simulation environment |
-| **OpenCV** | Latest | Computer vision |
-| **NumPy** | Latest | Numerical computing |
-| **Gym** | Latest | RL environment interface |
-| **TensorboardX** | Latest | Training visualization |
+### 🔧 **Modern Stack (Optimized)**
+| Component | Version | Purpose | CUDA 12.1 | Mixed Precision |
+|-----------|---------|---------|------------|-----------------|
+| **Python** | 3.9+ | Core runtime | ✅ | ✅ |
+| **PyTorch** | 2.1.2+cu121 | GPU-optimized DL framework | ✅ | ✅ |
+| **AirSim** | 1.8.1 | Modern simulation environment | ✅ | ✅ |
+| **Gymnasium** | 0.29+ | Modern RL interface | ✅ | ✅ |
+| **OmegaConf** | 2.3+ | Advanced configuration | ✅ | ✅ |
+| **CUDA** | 12.1 | GPU acceleration | ✅ | ✅ |
+| **TensorBoard** | Latest | Training visualization | ✅ | ✅ |
+
+### 📋 **Hardware Recommendations**
+| Component | Minimum | Recommended | Optimal |
+|-----------|---------|-------------|---------|
+| **GPU** | GTX 1660 (6GB) | RTX 3080 (10GB) | RTX 4090 (24GB) |
+| **RAM** | 16GB | 32GB | 64GB |
+| **Storage** | 50GB SSD | 100GB NVMe | 500GB NVMe |
+| **CPU** | 6-core | 8-core | 12+ core |
 
 ## Performance Monitoring
 
@@ -234,37 +278,54 @@ All algorithms include built-in tensorboard logging:
 tensorboard --logdir=runs/
 ```
 
-## Latest Features & Improvements
+## 🚀 Latest Features & Modern Optimizations (2024)
 
-### Major Update: Hierarchical Reinforcement Learning Suite
-- **HAC Algorithm Fixed**: Resolved UAV hovering issue with proper action scaling and network initialization
-- **Complete HRL Framework**: Added HAC, HIRO, FUN, and Options algorithms for complex navigation tasks
-- **Goal-Conditioned Environments**: New environment wrappers supporting hierarchical learning
-- **Multi-Level Navigation**: HAC now successfully navigates UAVs toward goals with temporal abstraction
+### 🔥 **Major Update: Windows 10 + CUDA 12.1 Optimization**
+- **Modern SAC Implementation**: Complete rewrite with CUDA 12.1 native support
+- **Mixed Precision Training**: AMP support for 2x faster training with minimal memory
+- **GPU Memory Management**: Intelligent memory allocation and automatic cleanup
+- **Windows Performance Tuning**: High-priority processes, CPU affinity, power optimization
+- **Real-time Performance Monitoring**: Live GPU metrics, memory usage, temperature tracking
 
-### Algorithm Enhancements
-- **HAC Action Scaling Fix**: Corrected action scaling from [-1,1] to [-2,2] for proper UAV movement
-- **Enhanced Network Architecture**: Improved weight initialization and tanh activation for stable training
-- **A3C Complete Implementation**: Full training loop, loss computation, and network architecture
-- **DDPG Twin-Critic Version**: Enhanced stability with dual Q-networks (TD3-inspired)
-- **Unified State Handling**: All algorithms now properly handle 9-dimensional inform_vector
-- **Smart Action Processing**: Automatic handling of continuous vs discrete action spaces
+### ⚡ **Algorithm Modernization**
+- **AirSim 1.8.1 Integration**: Native compatibility with latest AirSim API
+- **Gymnasium Interface**: Modern RL environment standards
+- **Async Processing**: Non-blocking image processing and action execution
+- **OmegaConf Configuration**: Advanced YAML-based configuration management
+- **Hardware-Aware Optimization**: Automatic batch size and memory optimization
 
-### Intelligent Collision Recovery System
-- **Progressive Penalty**: Escalating collision penalties (1st: -5, 2nd: -15, 3rd+: -30)
-- **Auto-Recovery**: Automatic repositioning to safe zones after multiple collisions
-- **Collision Counting**: Smart reset mechanism after collision-free intervals
-- **Training Continuity**: Collisions don't terminate episodes, preserving training data
+### 🛠 **Development Tools**
+- **Automated Installation**: One-click Windows + CUDA 12.1 setup
+- **Compatibility Checker**: Hardware detection and optimization recommendations
+- **Performance Profiler**: Detailed training metrics and bottleneck analysis
+- **Configuration Generator**: Hardware-specific config generation
+- **Error Recovery**: Robust error handling and training continuation
 
-### Visual Enhancements
-- **Fluorescent Trail Effects**: Ultra-cool neon trails during training
-- **Dynamic Color Changes**: Trail colors change every 20 episodes
-- **Multiple Effects**: laser_red, ghost_white, electric_blue, toxic_green, and more
+### 📊 **Monitoring & Analytics**
+- **TensorBoard Integration**: Real-time training visualization
+- **GPU Performance Tracking**: Memory, utilization, temperature monitoring
+- **Training Reports**: Comprehensive performance analysis
+- **Automated Optimization**: Dynamic batch size and memory adjustment
+- **Performance Alerts**: Real-time warnings for hardware issues
+
+### 🎯 **Legacy Algorithm Support**
+- **HAC Algorithm Fixed**: Resolved UAV hovering issue with proper action scaling
+- **Complete HRL Framework**: HAC, HIRO, FUN, and Options algorithms
+- **Intelligent Collision Recovery**: Progressive penalty system
+- **Visual Enhancements**: Fluorescent trail effects and dynamic colors
 
 ## Environment Features
 
-- **Photorealistic 3D environments** powered by Unreal Engine 4.27
-- **Physics-accurate drone dynamics** via AirSim
+### 🌟 **Modern Environment (AirSim 1.8.1)**
+- **GPU-Optimized Image Processing**: CUDA-accelerated computer vision pipeline
+- **Async Operation Support**: Non-blocking environment interactions
+- **Modern Gymnasium Interface**: Standard RL environment protocol
+- **Windows-Native Integration**: Optimized for Windows 10/11 performance
+- **Real-time Performance Monitoring**: Live FPS and latency tracking
+
+### 🎮 **Enhanced Simulation**
+- **Photorealistic 3D environments** powered by Unreal Engine 4.27.2
+- **Physics-accurate drone dynamics** via AirSim 1.8.1
 - **Dual control modes**: Discrete actions & continuous velocity control
 - **Hierarchical goal-conditioned environments** for complex navigation tasks
 - **Intelligent collision handling** with progressive recovery

@@ -1,38 +1,80 @@
-# Default configuration for Drone RL AirSim
+# Modern Default Configuration for Drone RL AirSim
+# Optimized for Windows 10 + AirSim 1.8.1 + CUDA 12.1
 # This file contains default settings that can be overridden by algorithm-specific configs
 
-# Environment settings
-env:
-  name: "AirSimEnv-v42"
-  max_episode_steps: 1000
-  action_space_type: "continuous"  # or "discrete"
-  observation_space_type: "mixed"  # image + state
-  
-# Training settings
+# Training configuration
 training:
-  total_timesteps: 300000
+  total_timesteps: 1000000
   batch_size: 256
   learning_rate: 0.0003
   gamma: 0.99
-  device: "cuda"  # or "cpu"
-  seed: 1
+  device: "auto"  # auto, cpu, cuda
+  seed: null
+  use_mixed_precision: true
+  gradient_accumulation_steps: 1
+  max_grad_norm: 0.5
+
+# GPU configuration (CUDA 12.1 optimized)
+gpu:
+  memory_fraction: 0.9
+  allow_growth: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  mixed_precision: true
+  gradient_checkpointing: false
+
+# Environment configuration (AirSim 1.8.1)
+environment:
+  name: "ModernAirSim-v1"
+  max_episode_steps: 1000
+  action_space_type: "continuous"  # continuous, discrete
+  observation_space_type: "mixed"  # image, state, mixed
   
-# Logging and evaluation
-logging:
-  log_interval: 1000
-  eval_interval: 10000
-  save_interval: 50000
-  tensorboard_log_dir: "experiments/logs"
-  
-# Model saving
-model:
-  save_dir: "models"
-  checkpoint_frequency: 10000
-  
-# AirSim specific
-airsim:
+  # AirSim settings
   host: "127.0.0.1"
   port: 41451
   vehicle_name: "SimpleFlight"
   camera_name: "front_center"
   image_type: "DepthVis"
+  image_width: 84
+  image_height: 84
+  
+  # Flight parameters
+  max_velocity: 10.0
+  max_altitude: 50.0
+  min_altitude: -10.0
+  takeoff_height: 2.0
+  
+  # Reward settings
+  collision_penalty: -100.0
+  goal_reward: 100.0
+  distance_reward_scale: 1.0
+  velocity_penalty_scale: -0.1
+  time_penalty: -0.01
+
+# Logging configuration
+logging:
+  log_level: "INFO"
+  log_interval: 1000
+  eval_interval: 10000
+  save_interval: 50000
+  tensorboard_log_dir: "experiments/logs"
+  save_replay_buffer: false
+  
+  # Performance monitoring
+  monitor_performance: true
+  monitor_interval: 1.0
+  save_performance_report: true
+
+# Experiment configuration
+experiment:
+  experiment_name: "modern_drone_rl"
+  save_dir: "experiments/results"
+  model_save_dir: "models"
+  checkpoint_frequency: 10000
+  max_checkpoints: 5
+  
+  # Evaluation settings
+  eval_episodes: 10
+  eval_deterministic: true
+  eval_render: false

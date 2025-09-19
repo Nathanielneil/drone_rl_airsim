@@ -1,42 +1,48 @@
-# SAC (Soft Actor-Critic) configuration
-algorithm: "sac"
+# Modern SAC (Soft Actor-Critic) Configuration
+# Optimized for Windows 10 + AirSim 1.8.1 + CUDA 12.1
+algorithm_name: "sac"
 
-# SAC specific parameters
+# Modern SAC parameters
 sac:
-  learning_rate: 0.0003
+  algorithm_name: "sac"
   buffer_size: 1000000
   learning_starts: 10000
-  batch_size: 256              # GPU可增加到512或更大
+  batch_size: 256
   tau: 0.005
-  gamma: 0.99
   train_freq: 1
   gradient_steps: 1
   target_update_interval: 1
   ent_coef: "auto"
   target_entropy: "auto"
+  use_sde: false
+  sde_sample_freq: -1
   
-# GPU特定设置 (当device为cuda时生效)
-gpu_settings:
-  batch_size_gpu: 512          # GPU时使用更大批次
-  buffer_size_gpu: 2000000     # GPU时使用更大缓存
-  mixed_precision: false       # 混合精度训练
+  # Network architecture (modern)
+  net_arch: [256, 256]
+  activation_fn: "relu"
   
-# Network architecture
-network:
-  policy_network:
-    hidden_sizes: [256, 256]
-    activation: "relu"
-  value_network:
-    hidden_sizes: [256, 256]
-    activation: "relu"
-    
-# Training settings
+  # GPU-specific optimizations
+  batch_size_gpu: 512
+  buffer_size_gpu: 2000000
+
+# Override training settings for SAC
 training:
   total_timesteps: 1000000
+  batch_size: 256
+  learning_rate: 0.0003
+  gamma: 0.99
+  device: "auto"
+  use_mixed_precision: true
+
+# Override GPU settings for CUDA 12.1
+gpu:
+  mixed_precision: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  memory_fraction: 0.9
+
+# Override experiment settings
+experiment:
+  experiment_name: "modern_sac_experiment"
   eval_episodes: 10
-  eval_freq: 25000
-  
-# Environment specific
-env:
-  normalize: true
-  clip_actions: true
+  eval_deterministic: true
