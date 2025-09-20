@@ -59,11 +59,11 @@ class ModernAirSimEnv(gym.Env):
         # 相机配置
         self.camera_name = self.config.get("camera_name", "front_center")
         self.image_type = self.config.get("image_type", "DepthVis")
-        self.image_width = self.config.get("image_width", 84)
-        self.image_height = self.config.get("image_height", 84)
+        self.image_width = int(self.config.get("image_width", 84))
+        self.image_height = int(self.config.get("image_height", 84))
         
         # 环境配置
-        self.max_episode_steps = self.config.get("max_episode_steps", 1000)
+        self.max_episode_steps = int(self.config.get("max_episode_steps", 1000))
         self.action_space_type = self.config.get("action_space_type", "continuous")
         
         # GPU配置
