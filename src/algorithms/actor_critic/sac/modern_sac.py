@@ -23,8 +23,14 @@ import gymnasium as gym
 
 # 现代化导入
 from stable_baselines3.common.buffers import ReplayBuffer
-from stable_baselines3.common.type_aliases import PyTorchObs
 from stable_baselines3.common.utils import get_device
+
+# 兼容不同版本的Stable-Baselines3
+try:
+    from stable_baselines3.common.type_aliases import PyTorchObs
+except ImportError:
+    # 新版本中PyTorchObs可能在不同位置或已移除
+    PyTorchObs = Union[torch.Tensor, np.ndarray, Dict[str, torch.Tensor]]
 
 # 设置日志
 logger = logging.getLogger(__name__)
