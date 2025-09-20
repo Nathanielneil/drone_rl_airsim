@@ -619,7 +619,17 @@ class ModernSAC:
             stats.update({
                 "gpu_memory_usage_gb": self.gpu_memory_usage[-1] if self.gpu_memory_usage else 0.0,
                 "avg_gpu_memory_gb": np.mean(self.gpu_memory_usage) if self.gpu_memory_usage else 0.0,
-                "gpu_utilization": torch.cuda.utilization() if hasattr(torch.cuda, 'utilization') else 0.0,
+                "gpu_utilization": self._get_gpu_utilization(),
             })
         
         return stats
+    
+    def _get_gpu_utilization(self) -> float:
+        """安全获取GPU利用率"""
+        try:
+            if torch.cuda.is_available() and hasattr(torch.cuda, 'utilization'):
+                return torch.cuda.utilization()
+        except Exception:
+            # pynvml未安装或其他错误，返回0
+            pass
+        return 0.0
