@@ -22,7 +22,7 @@ from collections import deque
 import gymnasium as gym
 
 # 现代化导入
-from stable_baselines3.common.buffers import ReplayBuffer
+from stable_baselines3.common.buffers import ReplayBuffer, DictReplayBuffer
 from stable_baselines3.common.utils import get_device
 
 # 兼容不同版本的Stable-Baselines3
@@ -413,16 +413,26 @@ class ModernSAC:
             self.scaler = GradScaler()
             logger.info("启用混合精度训练")
         
-        # 经验回放缓冲区
+        # 经验回放缓冲区 - 根据观察空间类型选择合适的buffer
         # 注意：optimize_memory_usage和handle_timeout_termination不能同时为True
-        self.replay_buffer = ReplayBuffer(
-            buffer_size=buffer_size,
-            observation_space=observation_space,
-            action_space=action_space,
-            device=self.device,
-            optimize_memory_usage=False,  # 禁用内存优化以支持timeout处理
-            handle_timeout_termination=True
-        )
+        if isinstance(observation_space, gym.spaces.Dict):
+            self.replay_buffer = DictReplayBuffer(
+                buffer_size=buffer_size,
+                observation_space=observation_space,
+                action_space=action_space,
+                device=self.device,
+                optimize_memory_usage=False,  # 禁用内存优化以支持timeout处理
+                handle_timeout_termination=True
+            )
+        else:
+            self.replay_buffer = ReplayBuffer(
+                buffer_size=buffer_size,
+                observation_space=observation_space,
+                action_space=action_space,
+                device=self.device,
+                optimize_memory_usage=False,  # 禁用内存优化以支持timeout处理
+                handle_timeout_termination=True
+            )
         
         # TensorBoard
         self.tensorboard_log = tensorboard_log
