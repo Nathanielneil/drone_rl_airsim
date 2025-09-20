@@ -170,6 +170,68 @@ class ModernAirSimEnv(gym.Env):
             logger.error(f"AirSim连接失败: {e}")
             raise ConnectionError(f"无法连接到AirSim: {e}")
     
+    def _set_initial_position(self, options: Optional[Dict] = None):
+        """设置自定义初始位置"""
+        if options is None:
+            options = {}
+        
+        # 检查是否有初始位置配置
+        initial_pos = options.get("initial_position")
+        if initial_pos is None:
+            initial_pos = self.config.get("initial_position")
+        
+        if initial_pos is not None:
+            try:
+                x = initial_pos.get("x", 0.0)
+                y = initial_pos.get("y", 0.0)
+                z = initial_pos.get("z", 0.0)
+                yaw = initial_pos.get("yaw", 0.0)
+                
+                # 创建位置和姿态
+                import airsim
+                position = airsim.Vector3r(float(x), float(y), float(z))
+                orientation = airsim.to_quaternion(0, 0, np.radians(yaw))
+                pose = airsim.Pose(position, orientation)
+                
+                # 设置位置
+                self.client.simSetVehiclePose(pose, ignore_collision=True, vehicle_name=self.vehicle_name)
+                
+                logger.info(f"设置初始位置: ({x}, {y}, {z}), 朝向: {yaw}°")
+                
+            except Exception as e:
+                logger.warning(f"设置初始位置失败，使用默认位置: {e}")
+        
+        # 检查随机位置配置
+        random_pos = options.get("random_position")
+        if random_pos is None:
+            random_pos = self.config.get("random_position")
+        
+        if random_pos and random_pos.get("enabled", False):
+            try:
+                import random
+                x_range = random_pos.get("x_range", [-10, 10])
+                y_range = random_pos.get("y_range", [-10, 10])
+                z_range = random_pos.get("z_range", [-8, -3])
+                yaw_range = random_pos.get("yaw_range", [0, 360])
+                
+                x = random.uniform(x_range[0], x_range[1])
+                y = random.uniform(y_range[0], y_range[1])
+                z = random.uniform(z_range[0], z_range[1])
+                yaw = random.uniform(yaw_range[0], yaw_range[1])
+                
+                # 设置随机位置
+                import airsim
+                position = airsim.Vector3r(float(x), float(y), float(z))
+                orientation = airsim.to_quaternion(0, 0, np.radians(yaw))
+                pose = airsim.Pose(position, orientation)
+                
+                self.client.simSetVehiclePose(pose, ignore_collision=True, vehicle_name=self.vehicle_name)
+                
+                logger.info(f"设置随机位置: ({x:.2f}, {y:.2f}, {z:.2f}), 朝向: {yaw:.1f}°")
+                
+            except Exception as e:
+                logger.warning(f"设置随机位置失败，使用默认位置: {e}")
+    
     def reset(
         self, 
         seed: Optional[int] = None, 
@@ -184,6 +246,9 @@ class ModernAirSimEnv(gym.Env):
         try:
             # 重置无人机
             self.client.reset()
+            
+            # 设置自定义初始位置（如果配置）
+            self._set_initial_position(options)
             
             # 启用API控制
             self.client.enableApiControl(True, vehicle_name=self.vehicle_name)

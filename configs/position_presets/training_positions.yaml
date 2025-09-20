@@ -1,0 +1,168 @@
+# 训练位置预设配置文件
+
+description: "训练用的各种初始位置预设"
+created_at: "2024-01-01"
+
+# 默认起点
+default_start:
+  vehicle: "Drone1"
+  x: 0.0
+  y: 0.0
+  z: -3.0
+  yaw: 0.0
+
+# 不同训练场景的起点预设
+training_scenarios:
+  
+  # 1. 基础训练起点
+  basic_training:
+    description: "基础训练起点，空旷区域"
+    position:
+      vehicle: "Drone1"
+      x: 0.0
+      y: 0.0
+      z: -5.0
+      yaw: 0.0
+  
+  # 2. 高级训练起点
+  advanced_training:
+    description: "高级训练起点，复杂环境"
+    position:
+      vehicle: "Drone1"
+      x: 15.0
+      y: 0.0
+      z: -8.0
+      yaw: 45.0
+  
+  # 3. 目标导航训练起点
+  goal_navigation:
+    description: "目标导航训练专用起点"
+    position:
+      vehicle: "Drone1"
+      x: 10.0
+      y: -10.0
+      z: -6.0
+      yaw: 30.0
+  
+  # 4. 障碍物场景起点
+  obstacle_course:
+    description: "障碍物训练场景起点"
+    position:
+      vehicle: "Drone1"
+      x: 5.0
+      y: 5.0
+      z: -4.0
+      yaw: 90.0
+  
+  # 5. 高空训练起点
+  high_altitude:
+    description: "高空训练起点"
+    position:
+      vehicle: "Drone1"
+      x: 0.0
+      y: 0.0
+      z: -15.0
+      yaw: 0.0
+
+# 多无人机编队预设
+formation_presets:
+  
+  # 2机编队
+  two_drone_formation:
+    description: "两架无人机编队"
+    positions:
+      - vehicle: "Drone1"
+        x: 0.0
+        y: 0.0
+        z: -5.0
+        yaw: 0.0
+      - vehicle: "Drone2"
+        x: 10.0
+        y: 0.0
+        z: -5.0
+        yaw: 0.0
+  
+  # 4机方形编队
+  square_formation:
+    description: "四架无人机方形编队"
+    positions:
+      - vehicle: "Drone1"
+        x: 0.0
+        y: 0.0
+        z: -5.0
+        yaw: 45.0
+      - vehicle: "Drone2"
+        x: 10.0
+        y: 0.0
+        z: -5.0
+        yaw: 135.0
+      - vehicle: "Drone3"
+        x: 10.0
+        y: 10.0
+        z: -5.0
+        yaw: 225.0
+      - vehicle: "Drone4"
+        x: 0.0
+        y: 10.0
+        z: -5.0
+        yaw: 315.0
+
+# 随机位置范围预设
+random_ranges:
+  
+  # 小范围随机
+  small_area:
+    description: "小范围内随机位置"
+    x_range: [-10, 10]
+    y_range: [-10, 10]
+    z_range: [-8, -3]
+    yaw_range: [0, 360]
+  
+  # 中等范围随机
+  medium_area:
+    description: "中等范围内随机位置"
+    x_range: [-30, 30]
+    y_range: [-30, 30]
+    z_range: [-15, -3]
+    yaw_range: [0, 360]
+  
+  # 大范围随机
+  large_area:
+    description: "大范围内随机位置"
+    x_range: [-100, 100]
+    y_range: [-100, 100]
+    z_range: [-25, -3]
+    yaw_range: [0, 360]
+
+# 特殊场景预设
+special_scenarios:
+  
+  # 城市环境
+  urban_environment:
+    description: "城市环境起点"
+    position:
+      vehicle: "Drone1"
+      x: 25.0
+      y: 15.0
+      z: -10.0
+      yaw: 180.0
+  
+  # 森林环境
+  forest_environment:
+    description: "森林环境起点"
+    position:
+      vehicle: "Drone1"
+      x: -20.0
+      y: -20.0
+      z: -12.0
+      yaw: 270.0
+  
+  # 山地环境
+  mountain_environment:
+    description: "山地环境起点"
+    position:
+      vehicle: "Drone1"
+      x: 0.0
+      y: 0.0
+      z: -20.0
+      yaw: 0.0

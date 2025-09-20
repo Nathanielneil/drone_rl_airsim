@@ -26,19 +26,19 @@ import gymnasium as gym
 from torch.utils.tensorboard import SummaryWriter
 
 # 项目导入
-from core.config_manager import ConfigManager, create_config_from_args, ModernConfig
-from environments.airsim_env.modern_airsim_env import ModernAirSimEnv
-from environments.airsim_env.improved_reward_env import ImprovedRewardAirSimEnv
-from environments.airsim_env.goal_based_env import GoalBasedAirSimEnv
-from algorithms.actor_critic.sac.modern_sac import ModernSAC
-from utils.performance.gpu_manager import (
+from src.core.config_manager import ConfigManager, create_config_from_args, ModernConfig
+from src.environments.airsim_env.modern_airsim_env import ModernAirSimEnv
+from src.environments.airsim_env.improved_reward_env import ImprovedRewardAirSimEnv
+from src.environments.airsim_env.goal_based_env import GoalBasedAirSimEnv
+from src.algorithms.actor_critic.sac.modern_sac import ModernSAC
+from src.utils.performance.gpu_manager import (
     PerformanceMonitor, 
     optimize_for_training,
     get_performance_monitor
 )
-from utils.model_manager import ModelManager
-from utils.data_manager import DataManager
-from utils.curriculum_manager import CurriculumManager
+from src.utils.model_manager import ModelManager
+from src.utils.data_manager import DataManager
+from src.utils.curriculum_manager import CurriculumManager
 
 # 设置日志
 logging.basicConfig(

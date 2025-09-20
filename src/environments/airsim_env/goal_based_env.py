@@ -10,8 +10,8 @@ import random
 import math
 from gymnasium import spaces
 
-from .improved_reward_env import ImprovedRewardAirSimEnv
-from ...utils.goal_validator import GoalValidator
+from src.environments.airsim_env.improved_reward_env import ImprovedRewardAirSimEnv
+from src.utils.goal_validator import GoalValidator
 
 logger = logging.getLogger(__name__)
 

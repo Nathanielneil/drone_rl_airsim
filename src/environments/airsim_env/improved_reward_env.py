@@ -6,7 +6,7 @@
 import numpy as np
 import logging
 from typing import Dict, Tuple
-from .modern_airsim_env import ModernAirSimEnv
+from src.environments.airsim_env.modern_airsim_env import ModernAirSimEnv
 
 logger = logging.getLogger(__name__)
 

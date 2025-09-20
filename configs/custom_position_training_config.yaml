@@ -1,0 +1,41 @@
+# 自定义初始位置训练配置
+# 演示如何在训练中设置不同的起始位置
+
+experiment:
+  experiment_name: "custom_position_training"
+  description: "使用自定义初始位置的训练示例"
+
+# 继承基础配置
+<<: *DEFAULTS
+training:
+  total_timesteps: 100000
+  seed: 42
+
+environment:
+  # 基础环境配置
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "Drone1"
+  max_episode_steps: 2000
+  
+  # === 初始位置配置选项 ===
+  
+  # 方案1: 固定初始位置
+  initial_position:
+    x: 15.0      # 前进15米
+    y: -5.0      # 左移5米  
+    z: -8.0      # 高度8米
+    yaw: 30.0    # 朝向30度
+  
+  # 方案2: 随机初始位置 (注释掉initial_position时生效)
+  # random_position:
+  #   enabled: true
+  #   x_range: [5, 25]       # X轴随机范围
+  #   y_range: [-15, 15]     # Y轴随机范围
+  #   z_range: [-12, -4]     # Z轴随机范围
+  #   yaw_range: [0, 360]    # 朝向随机范围
+  
+  # 其他环境配置
+  takeoff_height: 3.0
+  action_space_type: "continuous"
+  max_velocity: 8.0
