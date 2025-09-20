@@ -260,7 +260,22 @@ class ModernAirSimEnv(gym.Env):
         """执行动作"""
         if self.action_space_type == "continuous":
             # 连续动作：速度控制
-            vx, vy, vz = action
+            if isinstance(action, (list, tuple, np.ndarray)) and len(action) >= 3:
+                vx, vy, vz = action[0], action[1], action[2]
+            elif isinstance(action, (int, float, np.number)):
+                # 单一动作值，分配给所有轴
+                vx = vy = vz = float(action)
+            else:
+                # 确保有3个值
+                action = np.asarray(action).flatten()
+                if len(action) >= 3:
+                    vx, vy, vz = action[0], action[1], action[2]
+                elif len(action) == 1:
+                    vx = vy = vz = action[0]
+                else:
+                    vx = action[0] if len(action) > 0 else 0.0
+                    vy = action[1] if len(action) > 1 else 0.0
+                    vz = 0.0  # 默认不在Z轴移动
             
             # 缩放到实际速度范围
             max_vel = self.config["max_velocity"]
