@@ -1,15 +1,25 @@
-# Drone RL AirSim Documentation
+# 📚 Drone RL AirSim Documentation
 
-Welcome to the Drone RL AirSim documentation! This project provides a comprehensive framework for training reinforcement learning agents for autonomous drone navigation using Microsoft AirSim.
+Welcome to the **Modern UAV Reinforcement Learning Suite** documentation! This project provides a comprehensive framework for training reinforcement learning agents for autonomous drone navigation using Microsoft AirSim, optimized for **Windows 10 + AirSim 1.8.1 + CUDA 12.1**.
+
+## 🎯 **Latest Updates (2025/09/20)**
+- **🚀 Improved Reward Functions**: Solves collision penalty problems with curriculum learning
+- **📊 Scientific Data Management**: Structured experiment tracking and analysis 
+- **⚡ CUDA 12.1 Optimization**: Mixed precision training and GPU acceleration
 
 ## 📚 Documentation Structure
 
-### User Guides
+### 🚀 **Getting Started (Recommended Path)**
+- **[🎯 Reward Function Improvements](REWARD_IMPROVEMENTS.md)** - **Start here if having collision issues**
 - [Installation Guide](user_guide/installation.md) - Step-by-step installation instructions
 - [Quick Start](user_guide/quickstart.md) - Get up and running quickly
 - [Configuration Guide](user_guide/configuration.md) - How to configure training and environments
+
+### User Guides
 - [Training Guide](user_guide/training.md) - Complete training workflow
 - [Evaluation Guide](user_guide/evaluation.md) - Model evaluation and analysis
+- **[📊 Data Management Guide](../data/README.md)** - Scientific experiment organization
+- **[📁 Model Management Guide](../models/README.md)** - Production model versioning
 
 ### API Reference
 - [Core Components](api_reference/core.md) - Core framework components
@@ -24,18 +34,29 @@ Welcome to the Drone RL AirSim documentation! This project provides a comprehens
 - [Multi-Agent Training](tutorials/multi_agent.md) - Training multiple agents
 
 ### Algorithm Documentation
-- [SAC (Soft Actor-Critic)](algorithms/sac.md) - Continuous control with SAC
-- [PPO (Proximal Policy Optimization)](algorithms/ppo.md) - Policy gradient method
+#### 🚀 **Modern Algorithms (Recommended)**
+- **[🎯 Improved SAC](REWARD_IMPROVEMENTS.md)** - **Best choice: Curriculum learning + balanced rewards**
+- [Modern SAC](algorithms/sac.md) - GPU-optimized continuous control
+- [Modern PPO](algorithms/ppo.md) - Stable policy gradient method
+
+#### Legacy Algorithms
 - [DDPG (Deep Deterministic Policy Gradient)](algorithms/ddpg.md) - Actor-critic for continuous control
 - [TD3 (Twin Delayed Deep Deterministic)](algorithms/td3.md) - Improved DDPG
 - [DQN (Deep Q-Network)](algorithms/dqn.md) - Value-based method for discrete actions
 - [Rainbow DQN](algorithms/rainbow.md) - Enhanced DQN with multiple improvements
 
-## 🚀 Quick Links
+## 🚀 Quick Navigation
 
+### 🎯 **Problem-Specific Solutions**
+- **🚨 Having collision issues?** → [Reward Function Improvements](REWARD_IMPROVEMENTS.md)
+- **⚡ Want faster training?** → Use `scripts/train_improved_rewards.py`
+- **📊 Need to analyze results?** → [Data Management Guide](../data/README.md)
+- **🔧 Performance problems?** → Check CUDA 12.1 optimization
+
+### 📚 **Learning Path**
 - **New to the project?** Start with the [Installation Guide](user_guide/installation.md)
-- **Want to train your first model?** Follow the [Quick Start](user_guide/quickstart.md)
-- **Looking for specific algorithm details?** Check the [Algorithm Documentation](algorithms/)
+- **Want to train your first model?** Use **Improved SAC**: `python scripts/train_improved_rewards.py`
+- **Looking for algorithm details?** Check the [Improved SAC Guide](REWARD_IMPROVEMENTS.md)
 - **Need API details?** Browse the [API Reference](api_reference/)
 - **Want hands-on examples?** Try the [Tutorials](tutorials/)
 

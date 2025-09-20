@@ -1,0 +1,99 @@
+# 改进的训练配置
+# 解决负奖励过大和学习困难问题
+
+experiment:
+  experiment_name: "improved_reward_sac_v1"
+  description: "使用改进奖励函数的SAC训练"
+  save_dir: "experiments"
+  model_save_dir: "models"
+  checkpoint_frequency: 5000
+
+# 算法配置
+algorithm:
+  algorithm_name: "sac"
+  buffer_size: 100000
+  buffer_size_gpu: 200000  # GPU时使用更大缓冲区
+  batch_size_gpu: 512      # GPU时使用更大批次
+  tau: 0.005
+  train_freq: 1
+  gradient_steps: 1
+  target_update_interval: 1
+  ent_coef: "auto"
+  target_entropy: "auto"
+  learning_starts: 1000    # 降低学习开始步数
+
+# 训练配置
+training:
+  total_timesteps: 200000  # 增加训练步数
+  batch_size: 256
+  learning_rate: 0.0003
+  gamma: 0.99
+  device: "auto"
+  seed: 42
+
+# 改进的环境配置
+environment:
+  # 基础连接
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "Drone1"
+  
+  # 图像配置
+  camera_name: "front_center"
+  image_type: "DepthVis"
+  image_width: 84
+  image_height: 84
+  
+  # 环境限制
+  max_episode_steps: 2000   # 增加episode长度
+  action_space_type: "continuous"
+  max_velocity: 8.0         # 降低最大速度
+  max_altitude: 30.0
+  min_altitude: -5.0
+  takeoff_height: 3.0
+  
+  # 改进的奖励参数
+  reward_scale: 0.1
+  
+  # 进度奖励
+  progress_reward_scale: 8.0    # 鼓励前进
+  goal_reward: 30.0             # 降低目标奖励
+  
+  # 安全奖励
+  safe_distance_threshold: 4.0   # 安全距离
+  safety_reward_scale: 3.0       # 安全奖励
+  near_miss_penalty: -1.5        # 险情惩罚
+  collision_penalty: -8.0        # 大幅降低碰撞惩罚
+  
+  # 效率奖励
+  time_penalty: -0.01            # 轻微时间惩罚
+  velocity_reward_scale: 1.5     # 合理速度奖励
+  altitude_reward_scale: 0.8     # 高度维持奖励
+  hover_penalty: -0.3            # 悬停惩罚
+  
+  # 探索奖励
+  exploration_reward_scale: 1.0
+  
+  # 课程学习
+  curriculum_enabled: true
+  difficulty_level: 1            # 从简单开始
+  collision_forgiveness: 5       # 允许更多碰撞
+  
+  # 形状奖励
+  distance_shaping: true
+  velocity_shaping: true
+
+# GPU优化配置
+gpu:
+  mixed_precision: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  memory_fraction: 0.8
+
+# 日志配置
+logging:
+  tensorboard_log_dir: "logs/tensorboard"
+  log_interval: 1000
+  eval_freq: 10000
+  n_eval_episodes: 5
+  save_best_model: true

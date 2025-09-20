@@ -11,6 +11,7 @@ import argparse
 import logging
 import time
 import signal
+import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional
 import json
@@ -27,12 +28,16 @@ from torch.utils.tensorboard import SummaryWriter
 # 项目导入
 from core.config_manager import ConfigManager, create_config_from_args, ModernConfig
 from environments.airsim_env.modern_airsim_env import ModernAirSimEnv
+from environments.airsim_env.improved_reward_env import ImprovedRewardAirSimEnv
 from algorithms.actor_critic.sac.modern_sac import ModernSAC
 from utils.performance.gpu_manager import (
     PerformanceMonitor, 
     optimize_for_training,
     get_performance_monitor
 )
+from utils.model_manager import ModelManager
+from utils.data_manager import DataManager
+from utils.curriculum_manager import CurriculumManager
 
 # 设置日志
 logging.basicConfig(
@@ -65,12 +70,49 @@ class ModernTrainer:
         # 创建算法
         self.algorithm = self._create_algorithm()
         
-        # 设置日志记录
-        self.writer = self._setup_tensorboard()
-        
         # 性能监控
         self.performance_monitor = get_performance_monitor()
         self.performance_monitor.start_monitoring()
+        
+        # 模型管理器
+        self.model_manager = ModelManager()
+        
+        # 数据管理器 - 创建实验
+        self.data_manager = DataManager()
+        
+        # 检查是否使用改进奖励和课程学习
+        use_curriculum = getattr(self.config.environment, 'curriculum_enabled', False)
+        experiment_tags = [self.config.algorithm.algorithm_name, "airsim", "cuda121", "modern"]
+        if use_curriculum:
+            experiment_tags.append("curriculum_learning")
+            experiment_tags.append("improved_rewards")
+        
+        self.experiment_id = self.data_manager.create_experiment(
+            algorithm=self.config.algorithm.algorithm_name,
+            environment="airsim",
+            name=f"{self.config.algorithm.algorithm_name.upper()} Training - {self.config.experiment.experiment_name}",
+            description=f"Modern {self.config.algorithm.algorithm_name.upper()} training on AirSim 1.8.1 with CUDA 12.1",
+            tags=experiment_tags,
+            hyperparameters={
+                "total_timesteps": self.config.training.total_timesteps,
+                "batch_size": self.config.training.batch_size,
+                "learning_rate": self.config.training.learning_rate,
+                "gamma": self.config.training.gamma,
+                "buffer_size": getattr(self.config.algorithm, 'buffer_size', 0),
+                "tau": getattr(self.config.algorithm, 'tau', 0.0),
+                "curriculum_enabled": use_curriculum
+            }
+        )
+        logger.info(f"实验已创建: {self.experiment_id}")
+        
+        # 课程学习管理器
+        self.curriculum_manager = None
+        if use_curriculum and hasattr(self.env, 'get_reward_info'):
+            self.curriculum_manager = CurriculumManager(self.env, self.config.environment.__dict__)
+            logger.info("课程学习管理器已启用")
+        
+        # 设置日志记录 - 现在可以使用数据管理器路径
+        self.writer = self._setup_tensorboard()
         
         # 训练统计
         self.total_timesteps = 0
@@ -125,6 +167,7 @@ class ModernTrainer:
     
     def _create_environment(self) -> gym.Env:
         """创建环境"""
+        # 基础环境配置
         env_config = {
             "host": self.config.environment.host,
             "port": self.config.environment.port,
@@ -139,16 +182,48 @@ class ModernTrainer:
             "max_altitude": self.config.environment.max_altitude,
             "min_altitude": self.config.environment.min_altitude,
             "takeoff_height": self.config.environment.takeoff_height,
-            "collision_penalty": self.config.environment.collision_penalty,
-            "goal_reward": self.config.environment.goal_reward,
-            "distance_reward_scale": self.config.environment.distance_reward_scale,
-            "velocity_penalty_scale": self.config.environment.velocity_penalty_scale,
-            "time_penalty": self.config.environment.time_penalty,
             "use_gpu_processing": self.device.type == "cuda",
         }
         
-        env = ModernAirSimEnv(config=env_config)
-        logger.info(f"环境创建完成: {env_config['host']}:{env_config['port']}")
+        # 检查是否使用改进的奖励函数
+        use_improved_rewards = getattr(self.config.environment, 'reward_scale', None) is not None
+        
+        if use_improved_rewards:
+            # 添加改进奖励函数的配置
+            env_config.update({
+                "reward_scale": getattr(self.config.environment, 'reward_scale', 0.1),
+                "progress_reward_scale": getattr(self.config.environment, 'progress_reward_scale', 10.0),
+                "goal_reward": getattr(self.config.environment, 'goal_reward', 50.0),
+                "safe_distance_threshold": getattr(self.config.environment, 'safe_distance_threshold', 3.0),
+                "safety_reward_scale": getattr(self.config.environment, 'safety_reward_scale', 2.0),
+                "near_miss_penalty": getattr(self.config.environment, 'near_miss_penalty', -2.0),
+                "collision_penalty": getattr(self.config.environment, 'collision_penalty', -10.0),
+                "time_penalty": getattr(self.config.environment, 'time_penalty', -0.02),
+                "velocity_reward_scale": getattr(self.config.environment, 'velocity_reward_scale', 1.0),
+                "altitude_reward_scale": getattr(self.config.environment, 'altitude_reward_scale', 0.5),
+                "exploration_reward_scale": getattr(self.config.environment, 'exploration_reward_scale', 0.5),
+                "hover_penalty": getattr(self.config.environment, 'hover_penalty', -0.5),
+                "curriculum_enabled": getattr(self.config.environment, 'curriculum_enabled', True),
+                "difficulty_level": getattr(self.config.environment, 'difficulty_level', 1),
+                "collision_forgiveness": getattr(self.config.environment, 'collision_forgiveness', 3),
+                "distance_shaping": getattr(self.config.environment, 'distance_shaping', True),
+                "velocity_shaping": getattr(self.config.environment, 'velocity_shaping', True),
+            })
+            
+            env = ImprovedRewardAirSimEnv(config=env_config)
+            logger.info(f"创建改进奖励环境: {env_config['host']}:{env_config['port']}")
+        else:
+            # 使用原始环境配置
+            env_config.update({
+                "collision_penalty": getattr(self.config.environment, 'collision_penalty', -100.0),
+                "goal_reward": getattr(self.config.environment, 'goal_reward', 100.0),
+                "distance_reward_scale": getattr(self.config.environment, 'distance_reward_scale', 1.0),
+                "velocity_penalty_scale": getattr(self.config.environment, 'velocity_penalty_scale', -0.1),
+                "time_penalty": getattr(self.config.environment, 'time_penalty', -0.01),
+            })
+            
+            env = ModernAirSimEnv(config=env_config)
+            logger.info(f"创建标准环境: {env_config['host']}:{env_config['port']}")
         
         return env
     
@@ -189,8 +264,13 @@ class ModernTrainer:
     
     def _setup_tensorboard(self) -> SummaryWriter:
         """设置TensorBoard"""
-        log_dir = Path(self.config.logging.tensorboard_log_dir) / self.config.experiment.experiment_name
-        log_dir.mkdir(parents=True, exist_ok=True)
+        # 使用数据管理器的TensorBoard路径
+        if hasattr(self, 'data_manager') and hasattr(self, 'experiment_id'):
+            log_dir = self.data_manager.get_tensorboard_path(self.experiment_id, "train")
+        else:
+            # 回退到传统方式
+            log_dir = Path(self.config.logging.tensorboard_log_dir) / self.config.experiment.experiment_name
+            log_dir.mkdir(parents=True, exist_ok=True)
         
         writer = SummaryWriter(log_dir=str(log_dir))
         logger.info(f"TensorBoard日志目录: {log_dir}")
@@ -247,6 +327,7 @@ class ModernTrainer:
             if terminated or truncated:
                 # 记录episode信息
                 episode_time = time.time() - episode_start_time
+                self.last_episode_reward = episode_reward  # 记录最后一个episode的奖励
                 self._log_episode(episode_reward, episode_length, episode_time, step)
                 
                 # 重置环境
@@ -272,6 +353,23 @@ class ModernTrainer:
         
         # 训练完成
         logger.info("训练完成")
+        
+        # 更新实验状态
+        final_results = {
+            "total_timesteps": self.total_timesteps,
+            "total_episodes": self.episode_count,
+            "final_reward": getattr(self, 'last_episode_reward', 0.0),
+            "best_reward": self.best_reward,
+            "training_time_hours": (time.time() - self.start_time) / 3600
+        }
+        
+        self.data_manager.update_experiment_status(
+            experiment_id=self.experiment_id,
+            status="completed",
+            results=final_results,
+            notes=f"Training completed successfully with {self.total_timesteps} timesteps"
+        )
+        
         self.save_final_model()
         self.generate_training_report()
     
@@ -280,12 +378,54 @@ class ModernTrainer:
         # 更新最佳奖励
         if reward > self.best_reward:
             self.best_reward = reward
-            self.save_checkpoint("best_model")
+            self.save_checkpoint("best_model", is_best=True)
+        
+        # 记录到数据管理器
+        additional_data = {
+            "step": step,
+            "fps": length / time_taken if time_taken > 0 else 0,
+            "best_reward": self.best_reward
+        }
+        
+        # 如果使用改进环境，添加奖励组件信息
+        collision_occurred = False
+        if hasattr(self.env, 'get_reward_info'):
+            reward_info = self.env.get_reward_info()
+            additional_data.update(reward_info)
+            collision_occurred = reward_info.get('collision_count', 0) > 0
+        
+        # 更新课程学习管理器
+        if self.curriculum_manager:
+            self.curriculum_manager.update_performance(reward, length, collision_occurred)
+            
+            # 添加课程学习信息
+            curriculum_stats = self.curriculum_manager.get_current_stats()
+            additional_data.update({
+                "curriculum_difficulty": curriculum_stats.get("current_difficulty", 1),
+                "curriculum_success_rate": curriculum_stats.get("success_rate", 0.0),
+                "curriculum_collision_rate": curriculum_stats.get("collision_rate", 0.0)
+            })
+        
+        self.data_manager.save_episode_data(
+            experiment_id=self.experiment_id,
+            episode=self.episode_count,
+            reward=reward,
+            length=length,
+            time_taken=time_taken,
+            additional_data=additional_data
+        )
         
         # TensorBoard日志
         self.writer.add_scalar("Episode/Reward", reward, self.episode_count)
         self.writer.add_scalar("Episode/Length", length, self.episode_count)
         self.writer.add_scalar("Episode/Time", time_taken, self.episode_count)
+        
+        # 课程学习相关日志
+        if self.curriculum_manager:
+            curriculum_stats = self.curriculum_manager.get_current_stats()
+            self.writer.add_scalar("Curriculum/Difficulty", curriculum_stats.get("current_difficulty", 1), self.episode_count)
+            self.writer.add_scalar("Curriculum/SuccessRate", curriculum_stats.get("success_rate", 0.0), self.episode_count)
+            self.writer.add_scalar("Curriculum/CollisionRate", curriculum_stats.get("collision_rate", 0.0), self.episode_count)
         
         # 性能监控
         fps = length / time_taken if time_taken > 0 else 0
@@ -293,20 +433,41 @@ class ModernTrainer:
         
         # 控制台输出
         if self.episode_count % 10 == 0:
-            logger.info(f"Episode {self.episode_count:,} | "
-                       f"Step {step:,} | "
-                       f"Reward: {reward:.2f} | "
-                       f"Length: {length} | "
-                       f"FPS: {fps:.1f} | "
-                       f"Best: {self.best_reward:.2f}")
+            base_info = (f"Episode {self.episode_count:,} | "
+                        f"Step {step:,} | "
+                        f"Reward: {reward:.2f} | "
+                        f"Length: {length} | "
+                        f"FPS: {fps:.1f} | "
+                        f"Best: {self.best_reward:.2f}")
+            
+            # 添加课程学习信息
+            if self.curriculum_manager:
+                curriculum_stats = self.curriculum_manager.get_current_stats()
+                base_info += (f" | Difficulty: {curriculum_stats.get('current_difficulty', 1)} | "
+                             f"Success: {curriculum_stats.get('success_rate', 0.0):.2f}")
+            
+            logger.info(base_info)
     
     def _log_training_progress(self, step: int):
         """记录训练进度"""
         # 算法统计
         if hasattr(self.algorithm, 'get_performance_stats'):
             stats = self.algorithm.get_performance_stats()
+            
+            # 提取损失数据
+            loss_data = {}
             for key, value in stats.items():
                 self.writer.add_scalar(f"Algorithm/{key}", value, step)
+                if 'loss' in key.lower() or 'error' in key.lower():
+                    loss_data[key] = value
+            
+            # 保存损失数据到数据管理器
+            if loss_data:
+                self.data_manager.save_loss_data(
+                    experiment_id=self.experiment_id,
+                    step=step,
+                    losses=loss_data
+                )
         
         # 性能统计
         perf_stats = self.performance_monitor.get_detailed_stats()
@@ -328,29 +489,69 @@ class ModernTrainer:
         self.writer.add_scalar("Training/ElapsedTime", elapsed_time, step)
         self.writer.add_scalar("Training/StepsPerSecond", step / elapsed_time, step)
     
-    def save_checkpoint(self, name: str):
+    def save_checkpoint(self, name: str, is_best: bool = False):
         """保存检查点"""
+        # 临时保存到传统位置
         checkpoint_dir = Path(self.config.experiment.model_save_dir) / self.config.experiment.experiment_name
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        temp_checkpoint_path = checkpoint_dir / f"{name}.pth"
         
-        checkpoint_path = checkpoint_dir / f"{name}.pth"
+        # 保存算法到临时位置
+        self.algorithm.save(temp_checkpoint_path)
         
-        # 保存算法
-        self.algorithm.save(checkpoint_path)
+        # 收集性能指标
+        elapsed_time = time.time() - self.start_time
+        performance_metrics = {
+            "total_timesteps": self.total_timesteps,
+            "episodes_trained": self.episode_count,
+            "final_reward": getattr(self, 'last_reward', 0.0),
+            "best_reward": self.best_reward,
+            "training_duration": str(datetime.timedelta(seconds=int(elapsed_time))),
+            "gpu_name": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU",
+            "cuda_version": torch.version.cuda if torch.cuda.is_available() else "N/A"
+        }
         
-        # 保存训练状态
+        # 确定模型类型和标签
+        if is_best and self.total_timesteps >= 10000:  # 只有训练足够长时间的best模型才进production
+            model_type = "production"
+            version = "1.0.0"  # 可以从配置或参数获取
+            tag = "best"
+            notes = f"Best model from experiment {self.config.experiment.experiment_name}"
+        else:
+            model_type = "development"
+            version = None
+            tag = name  # best, final等
+            notes = f"Development checkpoint: {name}"
+        
+        # 使用模型管理器保存
+        try:
+            saved_dir = self.model_manager.save_model(
+                model_path=str(temp_checkpoint_path),
+                config=self.config.__dict__ if hasattr(self.config, '__dict__') else {},
+                algorithm=self.config.algorithm.algorithm_name,
+                experiment_name=self.config.experiment.experiment_name,
+                performance_metrics=performance_metrics,
+                model_type=model_type,
+                version=version,
+                tag=tag,
+                notes=notes
+            )
+            logger.info(f"模型已保存到科学目录结构: {saved_dir}")
+        except Exception as e:
+            logger.warning(f"科学保存失败，使用传统方式: {e}")
+            logger.info(f"检查点已保存: {temp_checkpoint_path}")
+        
+        # 保存训练状态（保持兼容性）
         state_path = checkpoint_dir / f"{name}_state.json"
         training_state = {
             "total_timesteps": self.total_timesteps,
             "episode_count": self.episode_count,
             "best_reward": self.best_reward,
-            "training_time": time.time() - self.start_time,
+            "training_time": elapsed_time,
         }
         
         with open(state_path, 'w') as f:
             json.dump(training_state, f, indent=2)
-        
-        logger.info(f"检查点已保存: {checkpoint_path}")
     
     def save_final_model(self):
         """保存最终模型"""
@@ -390,6 +591,22 @@ class ModernTrainer:
     
     def cleanup(self):
         """清理资源"""
+        try:
+            # 如果实验被中断，更新状态
+            if hasattr(self, 'data_manager') and hasattr(self, 'experiment_id'):
+                self.data_manager.update_experiment_status(
+                    experiment_id=self.experiment_id,
+                    status="stopped",
+                    results={
+                        "total_timesteps": getattr(self, 'total_timesteps', 0),
+                        "total_episodes": getattr(self, 'episode_count', 0),
+                        "best_reward": getattr(self, 'best_reward', float('-inf'))
+                    },
+                    notes="Training was interrupted or stopped early"
+                )
+        except Exception as e:
+            logger.warning(f"无法更新实验状态: {e}")
+        
         if hasattr(self, 'performance_monitor'):
             self.performance_monitor.stop_monitoring()
         
@@ -503,6 +720,23 @@ def main():
         logger.info("训练被用户中断")
     except Exception as e:
         logger.error(f"训练失败: {e}", exc_info=True)
+        
+        # 更新实验状态为失败
+        if 'trainer' in locals() and hasattr(trainer, 'data_manager'):
+            try:
+                trainer.data_manager.update_experiment_status(
+                    experiment_id=trainer.experiment_id,
+                    status="failed",
+                    results={
+                        "total_timesteps": getattr(trainer, 'total_timesteps', 0),
+                        "total_episodes": getattr(trainer, 'episode_count', 0),
+                        "best_reward": getattr(trainer, 'best_reward', float('-inf'))
+                    },
+                    notes=f"Training failed with error: {str(e)}"
+                )
+            except Exception as cleanup_error:
+                logger.warning(f"无法更新失败状态: {cleanup_error}")
+        
         raise
     finally:
         # 清理资源
