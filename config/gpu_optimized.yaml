@@ -33,7 +33,7 @@ model:
 airsim:
   host: "127.0.0.1"
   port: 41451
-  vehicle_name: "SimpleFlight"
+  vehicle_name: "Drone1"
   camera_name: "front_center"
   image_type: "DepthVis"
 

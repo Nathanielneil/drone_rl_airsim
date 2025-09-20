@@ -54,7 +54,7 @@ class ModernAirSimEnv(gym.Env):
         # AirSim连接配置
         self.host = self.config.get("host", "127.0.0.1")
         self.port = self.config.get("port", 41451)
-        self.vehicle_name = self.config.get("vehicle_name", "SimpleFlight")
+        self.vehicle_name = self.config.get("vehicle_name", "Drone1")
         
         # 相机配置
         self.camera_name = self.config.get("camera_name", "front_center")
@@ -95,7 +95,7 @@ class ModernAirSimEnv(gym.Env):
         return {
             "host": "127.0.0.1",
             "port": 41451,
-            "vehicle_name": "SimpleFlight",
+            "vehicle_name": "Drone1",
             "camera_name": "front_center",
             "image_type": "DepthVis",
             "image_width": 84,

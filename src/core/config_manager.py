@@ -53,7 +53,7 @@ class EnvironmentConfig:
     # AirSim设置
     host: str = "127.0.0.1"
     port: int = 41451
-    vehicle_name: str = "SimpleFlight"
+    vehicle_name: str = "Drone1"
     camera_name: str = "front_center"
     image_type: str = "DepthVis"
     image_width: int = 84

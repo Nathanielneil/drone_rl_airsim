@@ -8,7 +8,7 @@ airsim:
   host: "127.0.0.1"
   port: 41451
   timeout: 60
-  vehicle_name: "SimpleFlight"
+  vehicle_name: "Drone1"
   
 # Sensor configuration
 sensors:
