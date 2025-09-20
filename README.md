@@ -22,7 +22,7 @@
 
 This repository implements a **modern, GPU-optimized** suite of reinforcement learning algorithms specifically designed for UAV autonomous navigation. Fully optimized for **Windows 10 + AirSim 1.8.1 + CUDA 12.1**, featuring mixed precision training, asynchronous processing, and intelligent performance monitoring for maximum training efficiency.
 
-### 🚀 **New Features (2024)**
+### 🚀 **New Features (2025/09/20)**
 - **CUDA 12.1 Optimization**: Native support for latest CUDA with TF32 acceleration
 - **Mixed Precision Training**: Up to 2x faster training with AMP (Automatic Mixed Precision)
 - **Modern Architecture**: Gymnasium interface, OmegaConf configuration, async processing
