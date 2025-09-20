@@ -414,12 +414,13 @@ class ModernSAC:
             logger.info("启用混合精度训练")
         
         # 经验回放缓冲区
+        # 注意：optimize_memory_usage和handle_timeout_termination不能同时为True
         self.replay_buffer = ReplayBuffer(
             buffer_size=buffer_size,
             observation_space=observation_space,
             action_space=action_space,
             device=self.device,
-            optimize_memory_usage=optimize_memory,
+            optimize_memory_usage=False,  # 禁用内存优化以支持timeout处理
             handle_timeout_termination=True
         )
         
