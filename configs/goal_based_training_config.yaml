@@ -1,0 +1,126 @@
+# 基于目标点的训练配置
+# 实现点到点导航任务
+
+experiment:
+  experiment_name: "goal_based_sac_v1"
+  description: "基于目标点的SAC训练，实现点到点导航"
+  save_dir: "experiments"
+  model_save_dir: "models"
+  checkpoint_frequency: 5000
+
+# 算法配置
+algorithm:
+  algorithm_name: "sac"
+  buffer_size: 150000
+  buffer_size_gpu: 300000
+  batch_size_gpu: 512
+  tau: 0.005
+  train_freq: 1
+  gradient_steps: 1
+  target_update_interval: 1
+  ent_coef: "auto"
+  target_entropy: "auto"
+  learning_starts: 2000
+
+# 训练配置
+training:
+  total_timesteps: 300000  # 增加训练步数以学习导航
+  batch_size: 256
+  learning_rate: 0.0003
+  gamma: 0.99
+  device: "auto"
+  seed: 42
+
+# 基于目标的环境配置
+environment:
+  # 基础连接
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "Drone1"
+  
+  # 图像配置
+  camera_name: "front_center"
+  image_type: "DepthVis"
+  image_width: 84
+  image_height: 84
+  
+  # 环境限制
+  max_episode_steps: 3000    # 增加episode长度以完成目标
+  action_space_type: "continuous"
+  max_velocity: 8.0
+  max_altitude: 30.0
+  min_altitude: -5.0
+  takeoff_height: 3.0
+  
+  # 改进的奖励参数
+  reward_scale: 0.1
+  
+  # 进度奖励
+  progress_reward_scale: 3.0     # 减少，因为有目标奖励
+  
+  # 安全奖励
+  safe_distance_threshold: 4.0
+  safety_reward_scale: 2.0
+  near_miss_penalty: -1.0
+  collision_penalty: -5.0        # 进一步降低，避免过度恐惧
+  
+  # 效率奖励
+  time_penalty: -0.005           # 减少时间压力
+  velocity_reward_scale: 1.0
+  altitude_reward_scale: 0.5
+  hover_penalty: -0.2
+  
+  # 探索奖励
+  exploration_reward_scale: 0.5
+  
+  # 课程学习
+  curriculum_enabled: true
+  difficulty_level: 1
+  collision_forgiveness: 5
+  
+  # 形状奖励
+  distance_shaping: true
+  velocity_shaping: true
+  
+  # === 目标相关配置 ===
+  # 目标奖励
+  goal_reached_reward: 150.0      # 到达目标的大奖励
+  goal_distance_reward_scale: 8.0 # 接近目标的奖励
+  goal_progress_reward: 3.0       # 朝目标前进的奖励
+  
+  # 目标设置
+  goal_tolerance: 4.0             # 到达目标的距离阈值(米)
+  goal_generation_mode: "random"  # random, fixed, sequential
+  goal_range:
+    x: [15, 45]                   # X轴目标范围
+    y: [-20, 20]                  # Y轴目标范围  
+    z: [3, 8]                     # Z轴目标范围(高度)
+  
+  # 任务配置
+  max_goals_per_episode: 2        # 每episode的目标数
+  goal_timeout_steps: 1500        # 单个目标的超时步数
+  
+  # 可视化
+  visualize_goal: true            # 在仿真中显示目标
+  goal_marker_size: 3.0           # 目标标记大小
+  
+  # 目标验证设置
+  enable_goal_validation: true    # 启用智能目标验证
+  min_clearance: 3.0              # 最小安全距离(米)
+  max_validation_attempts: 15     # 最大验证尝试次数
+  validation_resolution: 1.5      # 路径检查分辨率(米)
+
+# GPU优化配置
+gpu:
+  mixed_precision: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  memory_fraction: 0.8
+
+# 日志配置
+logging:
+  tensorboard_log_dir: "logs/tensorboard"
+  log_interval: 1000
+  eval_freq: 15000
+  n_eval_episodes: 5
+  save_best_model: true

@@ -29,6 +29,7 @@ from torch.utils.tensorboard import SummaryWriter
 from core.config_manager import ConfigManager, create_config_from_args, ModernConfig
 from environments.airsim_env.modern_airsim_env import ModernAirSimEnv
 from environments.airsim_env.improved_reward_env import ImprovedRewardAirSimEnv
+from environments.airsim_env.goal_based_env import GoalBasedAirSimEnv
 from algorithms.actor_critic.sac.modern_sac import ModernSAC
 from utils.performance.gpu_manager import (
     PerformanceMonitor, 
@@ -185,10 +186,47 @@ class ModernTrainer:
             "use_gpu_processing": self.device.type == "cuda",
         }
         
-        # 检查是否使用改进的奖励函数
+        # 检查使用的环境类型
         use_improved_rewards = getattr(self.config.environment, 'reward_scale', None) is not None
+        use_goal_based = getattr(self.config.environment, 'goal_reached_reward', None) is not None
         
-        if use_improved_rewards:
+        if use_goal_based:
+            # 使用基于目标的环境
+            env_config.update({
+                "reward_scale": getattr(self.config.environment, 'reward_scale', 0.1),
+                "progress_reward_scale": getattr(self.config.environment, 'progress_reward_scale', 3.0),
+                "safe_distance_threshold": getattr(self.config.environment, 'safe_distance_threshold', 4.0),
+                "safety_reward_scale": getattr(self.config.environment, 'safety_reward_scale', 2.0),
+                "near_miss_penalty": getattr(self.config.environment, 'near_miss_penalty', -1.0),
+                "collision_penalty": getattr(self.config.environment, 'collision_penalty', -5.0),
+                "time_penalty": getattr(self.config.environment, 'time_penalty', -0.005),
+                "velocity_reward_scale": getattr(self.config.environment, 'velocity_reward_scale', 1.0),
+                "altitude_reward_scale": getattr(self.config.environment, 'altitude_reward_scale', 0.5),
+                "hover_penalty": getattr(self.config.environment, 'hover_penalty', -0.2),
+                "curriculum_enabled": getattr(self.config.environment, 'curriculum_enabled', True),
+                "difficulty_level": getattr(self.config.environment, 'difficulty_level', 1),
+                "collision_forgiveness": getattr(self.config.environment, 'collision_forgiveness', 5),
+                "distance_shaping": getattr(self.config.environment, 'distance_shaping', True),
+                "velocity_shaping": getattr(self.config.environment, 'velocity_shaping', True),
+                # 目标相关配置
+                "goal_reached_reward": getattr(self.config.environment, 'goal_reached_reward', 150.0),
+                "goal_distance_reward_scale": getattr(self.config.environment, 'goal_distance_reward_scale', 8.0),
+                "goal_progress_reward": getattr(self.config.environment, 'goal_progress_reward', 3.0),
+                "goal_tolerance": getattr(self.config.environment, 'goal_tolerance', 4.0),
+                "goal_generation_mode": getattr(self.config.environment, 'goal_generation_mode', "random"),
+                "goal_range": getattr(self.config.environment, 'goal_range', {
+                    "x": [15, 45], "y": [-20, 20], "z": [3, 8]
+                }),
+                "max_goals_per_episode": getattr(self.config.environment, 'max_goals_per_episode', 2),
+                "goal_timeout_steps": getattr(self.config.environment, 'goal_timeout_steps', 1500),
+                "visualize_goal": getattr(self.config.environment, 'visualize_goal', True),
+                "goal_marker_size": getattr(self.config.environment, 'goal_marker_size', 3.0),
+            })
+            
+            env = GoalBasedAirSimEnv(config=env_config)
+            logger.info(f"创建基于目标的环境: {env_config['host']}:{env_config['port']}")
+            
+        elif use_improved_rewards:
             # 添加改进奖励函数的配置
             env_config.update({
                 "reward_scale": getattr(self.config.environment, 'reward_scale', 0.1),
@@ -394,6 +432,16 @@ class ModernTrainer:
             additional_data.update(reward_info)
             collision_occurred = reward_info.get('collision_count', 0) > 0
         
+        # 如果使用基于目标的环境，添加目标信息
+        if hasattr(self.env, 'get_goal_info'):
+            goal_info = self.env.get_goal_info()
+            additional_data.update({
+                "goals_reached": goal_info.get('goals_reached', 0),
+                "goal_completion_rate": goal_info.get('goal_completion_rate', 0.0),
+                "distance_to_goal": goal_info.get('distance_to_goal', 0.0),
+                "current_goal": goal_info.get('current_goal', None)
+            })
+        
         # 更新课程学习管理器
         if self.curriculum_manager:
             self.curriculum_manager.update_performance(reward, length, collision_occurred)
@@ -427,6 +475,14 @@ class ModernTrainer:
             self.writer.add_scalar("Curriculum/SuccessRate", curriculum_stats.get("success_rate", 0.0), self.episode_count)
             self.writer.add_scalar("Curriculum/CollisionRate", curriculum_stats.get("collision_rate", 0.0), self.episode_count)
         
+        # 目标相关日志
+        if hasattr(self.env, 'get_goal_info'):
+            goal_info = self.env.get_goal_info()
+            self.writer.add_scalar("Goal/GoalsReached", goal_info.get("goals_reached", 0), self.episode_count)
+            self.writer.add_scalar("Goal/CompletionRate", goal_info.get("goal_completion_rate", 0.0), self.episode_count)
+            if goal_info.get("distance_to_goal", None) is not None:
+                self.writer.add_scalar("Goal/DistanceToGoal", goal_info.get("distance_to_goal", 0.0), self.episode_count)
+        
         # 性能监控
         fps = length / time_taken if time_taken > 0 else 0
         self.performance_monitor.record_fps(fps)
@@ -445,6 +501,13 @@ class ModernTrainer:
                 curriculum_stats = self.curriculum_manager.get_current_stats()
                 base_info += (f" | Difficulty: {curriculum_stats.get('current_difficulty', 1)} | "
                              f"Success: {curriculum_stats.get('success_rate', 0.0):.2f}")
+            
+            # 添加目标信息
+            if hasattr(self.env, 'get_goal_info'):
+                goal_info = self.env.get_goal_info()
+                goals_reached = goal_info.get('goals_reached', 0)
+                goal_completion = goal_info.get('goal_completion_rate', 0.0)
+                base_info += f" | Goals: {goals_reached} | Completion: {goal_completion:.2f}"
             
             logger.info(base_info)
     
