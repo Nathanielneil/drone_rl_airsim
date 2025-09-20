@@ -1,0 +1,60 @@
+# Drone RL AirSim Requirements - 测试通过版本
+# 基于用户成功运行的实际环境配置
+# Windows 10 + AirSim 1.8.1 + CUDA 12.1 + Python 3.10
+
+# =============================================================================
+# 核心依赖 - 精确版本（已测试通过）
+# =============================================================================
+
+# 数值计算库 - 使用NumPy 1.x避免兼容性问题
+numpy==1.24.3
+
+# 计算机视觉库 - 兼容NumPy 1.x的版本
+opencv-contrib-python==4.8.1.78
+
+# 消息包库 - AirSim兼容版本
+msgpack==0.6.2
+msgpack-rpc-python==0.4.1
+
+# AirSim - 确切版本
+airsim==1.8.1
+
+# PyTorch CUDA 12.1 - 精确版本组合
+--find-links https://download.pytorch.org/whl/cu121
+torch==2.1.2+cu121
+torchvision==0.16.2+cu121
+torchaudio==2.1.2+cu121
+
+# 强化学习库 - 兼容版本
+gymnasium==0.29.1
+stable-baselines3==2.0.0
+
+# 配置管理
+omegaconf==2.3.0
+
+# 可视化和监控
+tensorboard
+matplotlib==3.7.5
+
+# 数据处理 - 兼容NumPy 1.x
+pandas==1.5.3
+
+# =============================================================================
+# 推荐的安装步骤
+# =============================================================================
+# 1. 创建新环境: conda create -n drone_rl python=3.10 -y
+# 2. 激活环境: conda activate drone_rl  
+# 3. 按顺序安装: pip install -r requirements_tested_working.txt
+# 4. 测试导入: python -c "import torch; import cv2; import airsim; import gymnasium; print('✅ 所有导入成功!')"
+# 5. 测试连接: python -c "import airsim; client = airsim.MultirotorClient(ip='127.0.0.1', port=41451); client.confirmConnection(); print('✅ AirSim连接成功!')"
+# 6. 开始训练: python scripts/modern_train.py --total-timesteps 1000 --experiment-name test
+
+# =============================================================================
+# 重要说明
+# =============================================================================
+# - 此配置已在用户环境中完全测试通过
+# - 解决了所有已知的版本兼容性问题
+# - 修复了msgpack encoding参数问题
+# - 修复了NumPy 2.x兼容性问题
+# - 修复了Stable-Baselines3 PyTorchObs导入问题
+# - 支持AirSim 1.8.1和现代化训练脚本
