@@ -111,7 +111,7 @@ def test_airsim_connection():
     
     try:
         import airsim
-        client = airsim.MultirotorClient()
+        client = airsim.MultirotorClient(ip="127.0.0.1", port=41451)
         client.confirmConnection()
         print('✅ AirSim连接: 成功')
         return True

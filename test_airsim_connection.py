@@ -18,7 +18,7 @@ def test_airsim_connection():
     try:
         # 1. 创建客户端连接
         print('1. 创建AirSim客户端...')
-        client = airsim.MultirotorClient()
+        client = airsim.MultirotorClient(ip="127.0.0.1", port=41451)
         
         # 2. 确认连接
         print('2. 确认连接...')
