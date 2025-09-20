@@ -1,0 +1,92 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/main/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "ClockSpeed": 1.0,
+  "ViewMode": "FlyWithMe",
+  "Vehicles": {
+    "Drone1": {
+      "VehicleType": "SimpleFlight",
+      "DefaultVehicleState": "Armed",
+      "EnableCollisionPassthrough": false,
+      "EnableCollisions": true,
+      "AllowAPIAlways": true,
+      "X": 0, 
+      "Y": 0, 
+      "Z": -2,
+      "Yaw": 0,
+      "RC": {
+        "RemoteControlID": 0,
+        "AllowAPIWhenDisconnected": true
+      }
+    }
+  },
+  "CameraDefaults": {
+    "CaptureSettings": [
+      {
+        "ImageType": 0,
+        "Width": 224,
+        "Height": 224,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "MotionBlurAmount": 0
+      },
+      {
+        "ImageType": 2,
+        "Width": 224,
+        "Height": 224,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "MotionBlurAmount": 0
+      },
+      {
+        "ImageType": 5,
+        "Width": 224,
+        "Height": 224,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "MotionBlurAmount": 0
+      }
+    ]
+  },
+  "ApiServerPort": 41451,
+  "LogMessagesVisible": true,
+  "Recording": {
+    "RecordOnMove": false,
+    "RecordInterval": 0.05
+  },
+  "TimeOfDay": {
+    "Enabled": true,
+    "StartDateTime": "2025-09-20 10:24:00",
+    "CelestialClockSpeed": 1,
+    "StartDateTimeDst": false,
+    "UpdateIntervalSecs": 60
+  },
+  "Weather": {
+    "Enabled": true,
+    "Rain": 0,
+    "Roadwetness": 0,
+    "Snow": 0,
+    "RoadSnow": 0,
+    "MapWeather": false,
+    "WeatherParameter": {
+      "Rain": 0,
+      "Roadwetness": 0,
+      "Snow": 0,
+      "RoadSnow": 0,
+      "MapWeather": false
+    }
+  },
+  "Wind": {
+    "X": 0,
+    "Y": 0,
+    "Z": 0
+  },
+  "EngineSound": false,
+  "PhysicsEngineName": "",
+  "SpeedUnitFactor": 1.0,
+  "SpeedUnitLabel": "m/s",
+  "LocalHostIp": "127.0.0.1",
+  "RpcEnabled": true,
+  "SimModeIdx": 1
+}
