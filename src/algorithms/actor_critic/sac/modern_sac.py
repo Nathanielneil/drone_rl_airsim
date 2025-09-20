@@ -65,9 +65,17 @@ class ModernSACNetwork(nn.Module):
         # 特征提取器
         self.features_extractor = self._build_feature_extractor()
         
+        # 先移动特征提取器到设备
+        self.features_extractor = self.features_extractor.to(self.device)
+        
         # 获取特征维度
         with torch.no_grad():
             sample_obs = self._get_sample_observation()
+            # 将样本观察移动到正确设备
+            if isinstance(sample_obs, dict):
+                sample_obs = {k: v.to(self.device) for k, v in sample_obs.items()}
+            else:
+                sample_obs = sample_obs.to(self.device)
             features = self.features_extractor(sample_obs)
             features_dim = features.shape[-1]
         
