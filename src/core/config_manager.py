@@ -78,6 +78,7 @@ class AlgorithmConfig:
     """算法配置基类"""
     algorithm_name: str = "sac"
     policy_type: str = "MlpPolicy"
+    batch_size: int = 256
     learning_starts: int = 10000
     train_freq: int = 1
     gradient_steps: int = 1
