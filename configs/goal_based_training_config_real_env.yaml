@@ -47,7 +47,7 @@ environment:
   # 环境限制 (基于真实环境调整)
   max_episode_steps: 1500          # 较短的episode，适应小空间
   action_space_type: "continuous"
-  max_velocity: 300.0              # 3米/秒 (300cm/s) - 小空间需要较慢速度
+  max_velocity: 3.0                # 3米/秒 - AirSim速度单位为米/秒，不是厘米/秒
   max_altitude: 300.0              # 3米 = 300厘米 (环境上限)
   min_altitude: 40.0               # 0.4米 = 40厘米 (环境下限)
   takeoff_height: 100.0            # 1米 = 100厘米 (保守起飞高度)

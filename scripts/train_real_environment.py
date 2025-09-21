@@ -111,7 +111,7 @@ def main():
         
         # 显示关键参数
         print(f"   飞行参数:")
-        print(f"     最大速度: {env_config.get('max_velocity', 0)} cm/s → {env_config.get('max_velocity', 0)/100} 米/秒")
+        print(f"     最大速度: {env_config.get('max_velocity', 0)} 米/秒 (AirSim API使用米/秒单位)")
         print(f"     起飞高度: {env_config.get('takeoff_height', 0)} cm → {env_config.get('takeoff_height', 0)/100} 米")
         print(f"     高度范围: {env_config.get('min_altitude', 0)}-{env_config.get('max_altitude', 0)} cm")
         print(f"     → {env_config.get('min_altitude', 0)/100}-{env_config.get('max_altitude', 0)/100} 米")
