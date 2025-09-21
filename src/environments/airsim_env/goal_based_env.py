@@ -47,7 +47,7 @@ class GoalBasedAirSimEnv(ImprovedRewardAirSimEnv):
         self.validation_enabled = self.config.get("enable_goal_validation", True)
         self.validation_stats = {"generated": 0, "validated": 0, "failed": 0}
         
-        logger.info(f"目标环境初始化: 模式={self.goal_generation_mode}, 容忍度={self.goal_tolerance}m, 验证={self.validation_enabled}")
+        logger.info(f"目标环境初始化: 模式={self.goal_generation_mode}, 容忍度={self.goal_tolerance}cm({self.goal_tolerance/100:.1f}m), 验证={self.validation_enabled}")
     
     def _get_goal_default_config(self) -> Dict:
         """获取目标相关的默认配置"""
