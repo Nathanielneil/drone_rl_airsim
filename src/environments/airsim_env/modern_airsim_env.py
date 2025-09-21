@@ -255,9 +255,11 @@ class ModernAirSimEnv(gym.Env):
             self.client.armDisarm(True, vehicle_name=self.vehicle_name)
             
             # 起飞到指定高度
-            takeoff_height = self.config["takeoff_height"]
+            takeoff_height_cm = self.config["takeoff_height"]  # 厘米单位
+            takeoff_height_m = takeoff_height_cm / 100.0       # 转换为米
             self.client.takeoffAsync(vehicle_name=self.vehicle_name).join()
-            self.client.moveToZAsync(-takeoff_height, 1, vehicle_name=self.vehicle_name).join()
+            # NED坐标系：负Z值向上，正Z值向下
+            self.client.moveToZAsync(-takeoff_height_m, 1, vehicle_name=self.vehicle_name).join()
             
             # 等待稳定
             time.sleep(1.0)
