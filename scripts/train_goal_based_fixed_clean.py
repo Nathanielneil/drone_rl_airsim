@@ -46,6 +46,7 @@ def main():
         import numpy as np
         import torch
         import yaml
+        import json
         import gymnasium as gym
         from stable_baselines3 import SAC
         from stable_baselines3.common.vec_env import DummyVecEnv
@@ -103,10 +104,7 @@ def main():
         print(f"实验目录: {experiment_dir}")
         
         # 创建数据管理器
-        data_manager = DataManager(
-            experiment_name=args.experiment_name,
-            save_dir=str(experiment_dir)
-        )
+        data_manager = DataManager(base_dir="data")
         
         # 创建SAC算法
         print("创建SAC算法...")
@@ -176,7 +174,20 @@ def main():
             "tensorboard_log": str(tensorboard_dir)
         }
         
-        data_manager.save_experiment_metadata(training_info)
+        # 创建实验并保存元数据
+        experiment_id = data_manager.create_experiment(
+            algorithm="sac",
+            environment="airsim_goal_based",
+            name=args.experiment_name,
+            description="目标导航训练 (修复版)",
+            tags=["goal_navigation", "sac", "fixed_version"],
+            hyperparameters=training_info
+        )
+        
+        # 保存详细的训练信息
+        metadata_file = experiment_dir / "training_metadata.json"
+        with open(metadata_file, 'w', encoding='utf-8') as f:
+            json.dump(training_info, f, indent=2, ensure_ascii=False)
         
         print()
         print("查看训练结果:")

@@ -65,6 +65,7 @@ def main():
         import numpy as np
         import torch
         import yaml
+        import json
         import gymnasium as gym
         from stable_baselines3 import SAC
         from stable_baselines3.common.vec_env import DummyVecEnv
@@ -149,10 +150,7 @@ def main():
         print(f"实验目录: {experiment_dir}")
         
         # 创建数据管理器
-        data_manager = DataManager(
-            experiment_name=experiment_name,
-            save_dir=str(experiment_dir)
-        )
+        data_manager = DataManager(base_dir="data")
         
         # 创建SAC算法
         print("创建SAC算法 (真实环境优化)...")
@@ -248,7 +246,20 @@ def main():
                 "z": [z/100 for z in goal_range.get('z', [])]
             }
         
-        data_manager.save_experiment_metadata(training_info)
+        # 创建实验并保存元数据
+        experiment_id = data_manager.create_experiment(
+            algorithm="sac",
+            environment="airsim_goal_based" if args.mode == 'goal_based' else "airsim_improved",
+            name=experiment_name,
+            description=f"真实环境训练 - {mode_desc}",
+            tags=["real_environment", args.mode, "obstacle_avoidance"],
+            hyperparameters=training_info
+        )
+        
+        # 保存详细的训练信息
+        metadata_file = experiment_dir / "training_metadata.json"
+        with open(metadata_file, 'w', encoding='utf-8') as f:
+            json.dump(training_info, f, indent=2, ensure_ascii=False)
         
         print()
         print("查看训练结果:")
