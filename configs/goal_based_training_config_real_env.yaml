@@ -113,6 +113,12 @@ environment:
   max_validation_attempts: 25      # 增加尝试次数，因为有障碍物
   validation_resolution: 50.0     # 0.5米 = 50厘米 (更精细的检查)
   
+  # 真实场景边界设置 (厘米单位，与goal_range一致)
+  scene_bounds:
+    x: [-1000, 1000]              # X轴: -10到10米 = -1000到1000厘米
+    y: [-1000, 1000]              # Y轴: -10到10米 = -1000到1000厘米
+    z: [40, 300]                  # Z轴: 0.4到3米 = 40到300厘米
+  
   # 障碍物环境特殊设置
   obstacle_avoidance_enabled: true
   obstacle_penalty: -5.0           # 接近障碍物惩罚

@@ -97,6 +97,7 @@ class GoalBasedAirSimEnv(ImprovedRewardAirSimEnv):
                     "min_clearance": self.config.get("min_clearance", 3.0),
                     "max_validation_attempts": self.config.get("max_validation_attempts", 20),
                     "validation_resolution": self.config.get("validation_resolution", 1.0),
+                    "scene_bounds": self.config.get("scene_bounds"),  # 传递场景边界配置
                     "enable_caching": True
                 }
                 self.goal_validator = GoalValidator(self.client, validation_config)

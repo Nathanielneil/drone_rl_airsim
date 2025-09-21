@@ -159,14 +159,24 @@ class GoalValidator:
             # 获取当前位置作为参考
             current_pos = self._get_current_position(vehicle_name)
             
-            # 保守估计场景边界（可以根据具体环境调整）
-            self.scene_bounds = {
-                "x": [current_pos[0] - 200, current_pos[0] + 200],
-                "y": [current_pos[1] - 200, current_pos[1] + 200], 
-                "z": [current_pos[2] - 50, current_pos[2] + 50]
-            }
-            
-            logger.info(f"场景边界设定: {self.scene_bounds}")
+            # 使用配置中的场景边界，或使用保守估计
+            if "scene_bounds" in self.config:
+                # 使用配置的真实环境边界
+                bounds_config = self.config["scene_bounds"]
+                self.scene_bounds = {
+                    "x": bounds_config.get("x", [current_pos[0] - 200, current_pos[0] + 200]),
+                    "y": bounds_config.get("y", [current_pos[1] - 200, current_pos[1] + 200]),
+                    "z": bounds_config.get("z", [current_pos[2] - 50, current_pos[2] + 50])
+                }
+                logger.info(f"使用配置的场景边界: {self.scene_bounds}")
+            else:
+                # 保守估计场景边界（可以根据具体环境调整）
+                self.scene_bounds = {
+                    "x": [current_pos[0] - 200, current_pos[0] + 200],
+                    "y": [current_pos[1] - 200, current_pos[1] + 200], 
+                    "z": [current_pos[2] - 50, current_pos[2] + 50]
+                }
+                logger.info(f"使用默认场景边界: {self.scene_bounds}")
             
         except Exception as e:
             logger.error(f"场景边界分析失败: {e}")
