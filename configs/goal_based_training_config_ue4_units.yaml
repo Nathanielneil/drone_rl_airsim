@@ -1,0 +1,139 @@
+# 基于目标点的训练配置 (UE4厘米单位修正版)
+# UE4中距离单位为厘米(cm)，所有数值已按此调整
+
+experiment:
+  experiment_name: "goal_based_sac_ue4_units"
+  description: "基于目标点的SAC训练，使用正确的UE4厘米单位"
+  save_dir: "experiments"
+  model_save_dir: "models"
+  checkpoint_frequency: 5000
+
+# 算法配置
+algorithm:
+  algorithm_name: "sac"
+  buffer_size: 150000
+  buffer_size_gpu: 300000
+  batch_size_gpu: 512
+  tau: 0.005
+  train_freq: 1
+  gradient_steps: 1
+  target_update_interval: 1
+  ent_coef: "auto"
+  target_entropy: "auto"
+  learning_starts: 2000
+
+# 训练配置
+training:
+  total_timesteps: 300000
+  batch_size: 256
+  learning_rate: 0.0003
+  gamma: 0.99
+  device: "auto"
+  seed: 42
+
+# 基于目标的环境配置 (UE4厘米单位)
+environment:
+  # 基础连接
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "Drone1"
+  
+  # 图像配置
+  camera_name: "front_center"
+  image_type: "DepthVis"
+  image_width: 84
+  image_height: 84
+  
+  # 环境限制 (厘米单位)
+  max_episode_steps: 3000
+  action_space_type: "continuous"
+  max_velocity: 800.0              # 8米/秒 = 800厘米/秒
+  max_altitude: 3000.0             # 30米 = 3000厘米
+  min_altitude: -500.0             # -5米 = -500厘米
+  takeoff_height: 300.0            # 3米 = 300厘米
+  
+  # 改进的奖励参数
+  reward_scale: 0.1
+  
+  # 进度奖励
+  progress_reward_scale: 3.0
+  
+  # 安全奖励 (厘米单位)
+  safe_distance_threshold: 400.0   # 4米 = 400厘米
+  safety_reward_scale: 2.0
+  near_miss_penalty: -1.0
+  collision_penalty: -5.0
+  
+  # 效率奖励
+  time_penalty: -0.005
+  velocity_reward_scale: 1.0
+  altitude_reward_scale: 0.5
+  hover_penalty: -0.2
+  
+  # 探索奖励
+  exploration_reward_scale: 0.5
+  
+  # 课程学习
+  curriculum_enabled: true
+  difficulty_level: 1
+  collision_forgiveness: 5
+  
+  # 形状奖励
+  distance_shaping: true
+  velocity_shaping: true
+  
+  # === 目标相关配置 (UE4厘米单位) ===
+  # 目标奖励
+  goal_reached_reward: 150.0
+  goal_distance_reward_scale: 8.0
+  goal_progress_reward: 3.0
+  
+  # 目标设置 (厘米单位)
+  goal_tolerance: 400.0             # 4米 = 400厘米 (到达目标的距离阈值)
+  goal_generation_mode: "random"
+  goal_range:
+    x: [1500, 4500]                # 15-45米 = 1500-4500厘米
+    y: [-2000, 2000]               # ±20米 = ±2000厘米  
+    z: [300, 800]                  # 3-8米 = 300-800厘米 (实际为负值)
+  
+  # 任务配置
+  max_goals_per_episode: 2
+  goal_timeout_steps: 1500
+  
+  # 可视化
+  visualize_goal: true
+  goal_marker_size: 300.0           # 3米 = 300厘米
+  
+  # 目标验证设置 (厘米单位)
+  enable_goal_validation: true
+  min_clearance: 300.0              # 3米 = 300厘米 (最小安全距离)
+  max_validation_attempts: 15
+  validation_resolution: 150.0     # 1.5米 = 150厘米 (路径检查分辨率)
+
+# GPU优化配置
+gpu:
+  mixed_precision: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  memory_fraction: 0.8
+
+# 日志配置
+logging:
+  tensorboard_log_dir: "logs/tensorboard"
+  log_interval: 1000
+  eval_freq: 15000
+  n_eval_episodes: 5
+  save_best_model: true
+
+# ============================================
+# UE4单位换算参考 (厘米 → 米)
+# ============================================
+# 50cm = 0.5m     (最小安全距离)
+# 100cm = 1m      (基础单位)
+# 300cm = 3m      (起飞高度/安全距离)
+# 400cm = 4m      (目标容忍度)
+# 800cm = 8m      (最大速度)
+# 1500cm = 15m    (最近目标距离)
+# 2000cm = 20m    (左右范围)
+# 4500cm = 45m    (最远目标距离)
+# ============================================

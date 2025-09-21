@@ -1,0 +1,176 @@
+# 基于真实仿真环境的改进奖励训练配置
+# 环境参数：X轴±10米，Y轴±10米，Z轴0.4-3米，含障碍物
+
+experiment:
+  experiment_name: "improved_rewards_real_env"
+  description: "针对真实仿真环境优化的改进奖励SAC训练"
+  save_dir: "experiments"
+  model_save_dir: "models"
+  checkpoint_frequency: 3000
+
+# 算法配置
+algorithm:
+  algorithm_name: "sac"
+  buffer_size: 80000               # 小空间适中缓冲区
+  buffer_size_gpu: 150000
+  batch_size_gpu: 256
+  tau: 0.005
+  train_freq: 1
+  gradient_steps: 1
+  target_update_interval: 1
+  ent_coef: "auto"
+  target_entropy: "auto"
+  learning_starts: 800             # 更早开始学习
+
+# 训练配置
+training:
+  total_timesteps: 150000          # 小空间减少训练步数
+  batch_size: 128
+  learning_rate: 0.0005            # 稍微提高学习率
+  gamma: 0.995                     # 稍微提高折扣因子
+  device: "auto"
+  seed: 42
+
+# 真实小环境配置 (UE4厘米单位)
+environment:
+  # 基础连接
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "Drone1"
+  
+  # 图像配置
+  camera_name: "front_center"
+  image_type: "DepthVis"
+  image_width: 84
+  image_height: 84
+  
+  # 小环境限制参数
+  max_episode_steps: 1200          # 小空间shorter episodes
+  action_space_type: "continuous"
+  max_velocity: 250.0              # 2.5米/秒 = 250cm/s (更慢更精确)
+  max_altitude: 300.0              # 3米 = 300厘米
+  min_altitude: 40.0               # 0.4米 = 40厘米
+  takeoff_height: 80.0             # 0.8米 = 80厘米
+  
+  # ============ 针对小空间的改进奖励系统 ============
+  reward_scale: 0.3                # 提高奖励敏感度
+  
+  # 1. 进度奖励 (小空间高价值)
+  progress_reward_scale: 15.0      # 大幅增强进步奖励
+  progress_distance_threshold: 30.0  # 0.3米 = 30厘米 (更小的进步阈值)
+  
+  # 2. 安全奖励 (障碍物环境重要)
+  safe_distance_threshold: 120.0   # 1.2米 = 120厘米
+  safety_reward_scale: 8.0         # 高度重视安全
+  near_miss_penalty: -3.0          # 适度惩罚近距离
+  collision_penalty: -12.0         # 碰撞惩罚 (比原来-100大幅降低，但比空旷环境稍高)
+  
+  # 3. 效率奖励 (小空间优化)
+  time_penalty: -0.03              # 增加时间效率压力
+  velocity_reward_scale: 2.0       # 奖励合适的速度
+  altitude_reward_scale: 3.0       # 高度控制很重要
+  hover_penalty: -1.5              # 减少无效悬停
+  smooth_control_reward: 2.0       # 奖励平滑控制
+  
+  # 4. 探索奖励 (小空间但需要覆盖)
+  exploration_reward_scale: 3.0    # 鼓励探索整个小空间
+  exploration_distance_threshold: 80.0  # 0.8米 = 80厘米
+  
+  # 5. 课程学习 (障碍物环境调整)
+  curriculum_enabled: true
+  difficulty_level: 1
+  collision_forgiveness: 2         # 小空间降低容忍度
+  success_threshold: 0.8           # 80%成功率再提升难度
+  
+  # 6. 形状奖励 (全面启用)
+  distance_shaping: true
+  velocity_shaping: true
+  altitude_shaping: true
+  orientation_shaping: true        # 新增：朝向奖励
+  
+  # 7. 稳定性奖励 (小空间需要精确控制)
+  stability_reward_scale: 1.0
+  oscillation_penalty: -0.5       # 惩罚震荡
+  overshoot_penalty: -1.0         # 惩罚过冲
+  
+  # ============ 障碍物环境特殊配置 ============
+  # 障碍物感知
+  obstacle_avoidance_enabled: true
+  obstacle_penalty: -8.0           # 接近障碍物惩罚
+  obstacle_detection_range: 150.0  # 1.5米 = 150厘米
+  obstacle_reward_scale: 2.0       # 避开障碍物奖励
+  
+  # 空间利用
+  space_utilization_reward: 1.0    # 奖励空间利用率
+  boundary_approach_penalty: -2.0  # 惩罚接近边界
+  
+  # 高级功能
+  adaptive_rewards: true           # 自适应奖励
+  reward_normalization: true       # 奖励归一化
+  dynamic_difficulty: true         # 动态难度调整
+  
+  # 安全配置 (小空间特殊)
+  emergency_landing_height: 30.0   # 0.3米 = 30厘米
+  safe_zone_radius: 200.0          # 2米 = 200厘米
+
+# GPU优化配置
+gpu:
+  mixed_precision: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  memory_fraction: 0.7
+
+# 日志配置
+logging:
+  tensorboard_log_dir: "logs/tensorboard"
+  log_interval: 300               # 更频繁日志
+  eval_freq: 6000
+  n_eval_episodes: 3
+  save_best_model: true
+  
+  # 详细监控
+  log_reward_components: true
+  log_curriculum_progress: true
+  log_safety_metrics: true
+  log_obstacle_interactions: true
+  log_spatial_coverage: true      # 空间覆盖分析
+  log_precision_metrics: true     # 精度指标
+
+# ============================================
+# 真实小环境特点分析:
+# ============================================
+# 空间规模: 20m × 20m × 2.6m = 1,040立方米
+# 
+# 挑战:
+# 1. 空间紧凑 - 需要精确控制
+# 2. 有障碍物 - 需要避障能力  
+# 3. 高度受限 - 需要高度意识
+# 4. 边界效应 - 容易出界
+# 
+# 策略:
+# 1. 降低速度提高精度
+# 2. 增强安全和进步奖励
+# 3. 启用障碍物感知
+# 4. 课程学习适应复杂度
+# ============================================
+
+# ============================================
+# 预期改进效果:
+# ============================================
+# 1. 更精确的位置控制
+# 2. 更好的障碍物避开能力
+# 3. 更高的空间利用率
+# 4. 更稳定的飞行轨迹
+# 5. 更快的小空间适应性
+# ============================================
+
+# ============================================
+# 真实环境坐标换算 (UE4厘米):
+# ============================================
+# X轴: -10米到+10米 = -1000cm到+1000cm
+# Y轴: -10米到+10米 = -1000cm到+1000cm  
+# Z轴: 0.4米到3米 = 40cm到300cm
+# 安全距离: 1.2米 = 120cm
+# 进步阈值: 0.3米 = 30cm
+# 探索阈值: 0.8米 = 80cm
+# ============================================

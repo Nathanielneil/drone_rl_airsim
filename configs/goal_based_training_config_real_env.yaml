@@ -1,0 +1,164 @@
+# 基于真实仿真环境参数的训练配置
+# 根据实际仿真环境调整：X轴±10米，Y轴±10米，Z轴0.4-3米，含障碍物
+
+experiment:
+  experiment_name: "goal_based_sac_real_env"
+  description: "基于真实仿真环境参数的SAC目标导航训练"
+  save_dir: "experiments"
+  model_save_dir: "models"
+  checkpoint_frequency: 3000
+
+# 算法配置
+algorithm:
+  algorithm_name: "sac"
+  buffer_size: 100000               # 适中的缓冲区大小
+  buffer_size_gpu: 200000
+  batch_size_gpu: 256              # 适中的批次大小
+  tau: 0.005
+  train_freq: 1
+  gradient_steps: 1
+  target_update_interval: 1
+  ent_coef: "auto"
+  target_entropy: "auto"
+  learning_starts: 1000            # 较早开始学习
+
+# 训练配置
+training:
+  total_timesteps: 250000          # 适中的训练步数
+  batch_size: 128
+  learning_rate: 0.0003
+  gamma: 0.99
+  device: "auto"
+  seed: 42
+
+# 真实环境配置 (UE4厘米单位)
+environment:
+  # 基础连接
+  host: "127.0.0.1"
+  port: 41451
+  vehicle_name: "Drone1"
+  
+  # 图像配置
+  camera_name: "front_center"
+  image_type: "DepthVis"
+  image_width: 84
+  image_height: 84
+  
+  # 环境限制 (基于真实环境调整)
+  max_episode_steps: 1500          # 较短的episode，适应小空间
+  action_space_type: "continuous"
+  max_velocity: 300.0              # 3米/秒 (300cm/s) - 小空间需要较慢速度
+  max_altitude: 300.0              # 3米 = 300厘米 (环境上限)
+  min_altitude: 40.0               # 0.4米 = 40厘米 (环境下限)
+  takeoff_height: 100.0            # 1米 = 100厘米 (保守起飞高度)
+  
+  # 针对小空间优化的奖励参数
+  reward_scale: 0.2                # 增加奖励敏感度
+  
+  # 进度奖励 (小空间调整)
+  progress_reward_scale: 10.0      # 增强，因为空间小进步更珍贵
+  progress_distance_threshold: 50.0  # 0.5米 = 50厘米
+  
+  # 安全奖励 (小空间高度重视安全)
+  safe_distance_threshold: 150.0   # 1.5米 = 150厘米 (小空间需要更近的安全阈值)
+  safety_reward_scale: 5.0         # 高度重视安全
+  near_miss_penalty: -2.0          # 适中惩罚
+  collision_penalty: -10.0         # 适度惩罚 (空间小，碰撞更可能)
+  
+  # 效率奖励 (小空间优化)
+  time_penalty: -0.02              # 增加时间压力
+  velocity_reward_scale: 1.5
+  altitude_reward_scale: 2.0       # 重视高度控制
+  hover_penalty: -1.0              # 减少悬停
+  
+  # 探索奖励 (小空间调整)
+  exploration_reward_scale: 2.0    # 鼓励探索小空间
+  exploration_distance_threshold: 100.0  # 1米 = 100厘米
+  
+  # 课程学习 (适应复杂环境)
+  curriculum_enabled: true
+  difficulty_level: 1
+  collision_forgiveness: 3         # 减少容忍次数
+  
+  # 形状奖励
+  distance_shaping: true
+  velocity_shaping: true
+  altitude_shaping: true
+  
+  # === 基于真实环境的目标配置 ===
+  # 目标奖励 (小空间高价值)
+  goal_reached_reward: 200.0       # 增加到达奖励
+  goal_distance_reward_scale: 15.0 # 增强距离奖励
+  goal_progress_reward: 5.0        # 增强进度奖励
+  
+  # 真实环境目标设置 (UE4厘米单位)
+  goal_tolerance: 80.0             # 0.8米 = 80厘米 (小空间需要更精确)
+  goal_generation_mode: "random"
+  goal_range:
+    x: [-1000, 1000]              # X轴: -10到10米 = -1000到1000厘米
+    y: [-1000, 1000]              # Y轴: -10到10米 = -1000到1000厘米  
+    z: [40, 300]                  # Z轴: 0.4到3米 = 40到300厘米
+  
+  # 任务配置 (小空间调整)
+  max_goals_per_episode: 1         # 小空间，每次1个目标更合理
+  goal_timeout_steps: 800          # 较短超时时间
+  
+  # 可视化
+  visualize_goal: true
+  goal_marker_size: 100.0          # 1米 = 100厘米 (小空间需要小标记)
+  
+  # 目标验证设置 (适应障碍物环境)
+  enable_goal_validation: true     # 非常重要！环境有障碍物
+  min_clearance: 80.0              # 0.8米 = 80厘米 (小空间需要更紧密的安全距离)
+  max_validation_attempts: 25      # 增加尝试次数，因为有障碍物
+  validation_resolution: 50.0     # 0.5米 = 50厘米 (更精细的检查)
+  
+  # 障碍物环境特殊设置
+  obstacle_avoidance_enabled: true
+  obstacle_penalty: -5.0           # 接近障碍物惩罚
+  obstacle_detection_range: 200.0  # 2米 = 200厘米 (障碍物检测范围)
+
+# GPU优化配置
+gpu:
+  mixed_precision: true
+  enable_tf32: true
+  enable_cudnn_benchmark: true
+  memory_fraction: 0.7             # 稍微保守一点
+
+# 日志配置
+logging:
+  tensorboard_log_dir: "logs/tensorboard"
+  log_interval: 500               # 更频繁的日志
+  eval_freq: 8000
+  n_eval_episodes: 3              # 减少评估回合
+  save_best_model: true
+  
+  # 特殊监控
+  log_obstacle_interactions: true
+  log_spatial_coverage: true      # 监控空间覆盖情况
+
+# ============================================
+# 真实环境参数总结:
+# ============================================
+# 空间范围: 20m × 20m × 2.6m = 1,040立方米
+# X轴: -10米到+10米 (-1000cm到+1000cm)  
+# Y轴: -10米到+10米 (-1000cm到+1000cm)
+# Z轴: 0.4米到3米 (40cm到300cm)
+# 
+# 环境特点:
+# - 相对紧凑的空间
+# - 有障碍物存在
+# - 高度范围有限 (2.6米)
+# - 需要精确控制
+# ============================================
+
+# ============================================
+# 训练策略调整:
+# ============================================
+# 1. 降低速度限制 (3米/秒)
+# 2. 增强安全奖励权重
+# 3. 启用智能目标验证 (避开障碍物)
+# 4. 减少目标容忍度 (0.8米)
+# 5. 增加验证尝试次数 (25次)
+# 6. 更精细的路径检查 (0.5米分辨率)
+# ============================================
